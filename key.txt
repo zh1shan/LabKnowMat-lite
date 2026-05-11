@@ -1,0 +1,3 @@
+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
+https://openrouter.ai/api/v1/chat/completions
+moonshotai/kimi-k2.6
