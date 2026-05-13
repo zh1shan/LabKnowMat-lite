@@ -62,4 +62,27 @@ def run_tests():
         print(f"Saved visualization to {out_path}")
 
 if __name__ == "__main__":
-    run_tests()
+    if len(sys.argv) > 1:
+        img_path = sys.argv[1]
+        if not os.path.exists(img_path):
+            print(f"Error: Image not found at {img_path}")
+            sys.exit(1)
+        ocr_tool = OCRTextLocator()
+        image = cv2.imread(img_path)
+        if image is None:
+            print("Error: Failed to read image")
+            sys.exit(1)
+        results = ocr_tool.run(image)
+        output_image = image.copy()
+        for item in results:
+            cx, cy = int(item['cx']), int(item['cy'])
+            box = np.array(item['box']).astype(np.int32)
+            cv2.polylines(output_image, [box], isClosed=True, color=(0, 255, 0), thickness=2)
+            cv2.circle(output_image, (cx, cy), 3, (0, 0, 255), -1)
+            print(f"  - '{item['text']}' at ({cx}, {cy})")
+        base, ext = os.path.splitext(img_path)
+        out_path = f"{base}_ocr_result{ext}"
+        cv2.imwrite(out_path, output_image)
+        print(f"Saved visualization to {out_path}")
+    else:
+        run_tests()
