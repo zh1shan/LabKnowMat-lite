@@ -1,14 +1,25 @@
+import os
 from typing import Dict, Any, List
 from .llm import KimiLLM
 import json
+import re
 
 class SemanticPlanner:
     """
     Phase 1: Analyzes the chart image and generates a high-level semantic structure 
-    and annotation outline.
+    and annotation outline based on predefined guidelines.
     """
     def __init__(self, llm: KimiLLM):
         self.llm = llm
+        
+        # Load guidelines
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        guide_path = os.path.join(current_dir, "..", "guidelines", "semantic_parsing_guide.md")
+        if os.path.exists(guide_path):
+            with open(guide_path, "r", encoding="utf-8") as f:
+                self.guidelines = f.read()
+        else:
+            self.guidelines = "No guidelines found."
 
     def parse_chart_structure(self, image_url_or_base64: str) -> Dict[str, Any]:
         """
@@ -21,9 +32,13 @@ class SemanticPlanner:
             Dict[str, Any]: A JSON dictionary describing the chart structure.
         """
         prompt = (
-            "You are a chart analysis expert. Please analyze the provided chart image and "
-            "return its semantic structure in JSON format. Include the 'chart_type' and a list of 'components'. "
-            "Components can be x_axis, y_axis_left, bar_series, line_series, etc., with their associated labels and colors."
+            "You are an expert chart analysis agent. Please read the following guidelines carefully "
+            "and analyze the provided chart image.\n\n"
+            "### Guidelines ###\n"
+            f"{self.guidelines}\n\n"
+            "Please output the semantic structure and attributes of the chart image. "
+            "CRITICAL: You MUST output ONLY a valid JSON object. Do not include markdown code blocks, "
+            "do not include conversational text. Only the JSON dictionary containing the 'chart_type' and 'components'."
         )
 
         messages = [
@@ -43,15 +58,13 @@ class SemanticPlanner:
 
         response_text = self.llm.chat(messages, temperature=0.1)
         
-        # TODO: Implement robust JSON extraction from response_text
         try:
-            # Simple fallback for demonstration
-            # In production, use regex to extract JSON blocks
-            start_idx = response_text.find('{')
-            end_idx = response_text.rfind('}') + 1
-            if start_idx != -1 and end_idx != -1:
-                return json.loads(response_text[start_idx:end_idx])
+            # Try to find JSON block using regex if there's surrounding text
+            match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if match:
+                json_str = match.group(0)
+                return json.loads(json_str)
             else:
-                return {"error": "Failed to extract JSON from response"}
+                return {"error": "Failed to extract JSON from response", "raw": response_text}
         except json.JSONDecodeError:
-            return {"error": "Invalid JSON response"}
+            return {"error": "Invalid JSON response", "raw": response_text}
