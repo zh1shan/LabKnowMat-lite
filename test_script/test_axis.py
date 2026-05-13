@@ -8,14 +8,17 @@ sys.path.insert(0, project_root)
 
 from agent_framework.tools.axis import AxisLineLocator
 
-def test_axis_locator():
+def test_axis_locator(image_path=None):
     print("Testing AxisLineLocator")
     print("=" * 50)
     
     axis_tool = AxisLineLocator()
     
     # We will test on a chart that clearly has horizontal and vertical lines
-    sample_image_path = os.path.join(project_root, "..", "reference", "paper_annotation", "01_Role of centres", "charts", "chart01.jpg")
+    if image_path:
+        sample_image_path = image_path
+    else:
+        sample_image_path = os.path.join(project_root, "..", "reference", "paper_annotation", "01_Role of centres", "charts", "chart01.jpg")
     
     if not os.path.exists(sample_image_path):
         print(f"Error: Could not find image at {sample_image_path}")
@@ -58,9 +61,14 @@ def test_axis_locator():
              pos = (p1[0] + 10, p1[1] + 20)
         cv2.putText(output_image, label, pos, cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
         
-    output_path = os.path.join(current_dir, "axis_test_result.jpg")
+    # Save output to the same directory as the input image
+    output_filename = "axis_test_result_" + os.path.basename(sample_image_path)
+    output_path = os.path.join(os.path.dirname(os.path.abspath(sample_image_path)), output_filename)
     cv2.imwrite(output_path, output_image)
     print(f"\nSaved visualization to {output_path}")
 
 if __name__ == "__main__":
-    test_axis_locator()
+    if len(sys.argv) > 1:
+        test_axis_locator(sys.argv[1])
+    else:
+        test_axis_locator()
