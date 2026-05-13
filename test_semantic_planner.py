@@ -1,4 +1,5 @@
 import os
+import sys
 import base64
 import json
 import requests
@@ -9,13 +10,16 @@ def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
-def test_semantic_planner():
+def test_semantic_planner(image_path_arg=None):
     # Paths
     current_dir = os.path.dirname(os.path.abspath(__file__))
     guide_path = os.path.join(current_dir, "guidelines", "semantic_parsing_guide.md")
     
-    # Let's use a sample image from the reference dataset
-    sample_image_path = os.path.abspath(os.path.join(current_dir, "..", "reference", "paper_annotation", "01_Role of centres", "charts", "chart01.jpg"))
+    # Let's use a sample image from the reference dataset or provided argument
+    if image_path_arg:
+        sample_image_path = os.path.abspath(image_path_arg)
+    else:
+        sample_image_path = os.path.abspath(os.path.join(current_dir, "..", "reference", "paper_annotation", "01_Role of centres", "charts", "chart01.jpg"))
     
     if not os.path.exists(sample_image_path):
         print(f"Error: Sample image not found at {sample_image_path}")
@@ -82,4 +86,7 @@ def test_semantic_planner():
     print("="*50)
 
 if __name__ == "__main__":
-    test_semantic_planner()
+    if len(sys.argv) > 1:
+        test_semantic_planner(sys.argv[1])
+    else:
+        test_semantic_planner()
