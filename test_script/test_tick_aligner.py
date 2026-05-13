@@ -19,12 +19,11 @@ def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
-def test_aligner():
+def test_aligner(sample_image_path):
     print("Testing Tick Aligner (Full Pipeline)")
     print("=" * 50)
 
     # 1. Setup paths
-    sample_image_path = os.path.join(project_root, "..", "reference", "paper_annotation", "01_Role of centres", "charts", "chart01.jpg")
     if not os.path.exists(sample_image_path):
         print(f"Error: Could not find image at {sample_image_path}")
         return
@@ -88,9 +87,14 @@ def test_aligner():
             cv2.line(output_image, (orig_cx, orig_cy), (new_cx, new_cy), (0, 255, 255), 2)
             print(f"Aligned text '{orig['text']}': ({orig_cx}, {orig_cy}) -> ({new_cx}, {new_cy})")
 
-    out_path = os.path.join(current_dir, "aligned_ticks_result.jpg")
+    base_name = os.path.splitext(os.path.basename(sample_image_path))[0]
+    out_dir = os.path.dirname(os.path.abspath(sample_image_path))
+    out_path = os.path.join(out_dir, f"{base_name}_aligned_ticks_result.jpg")
     cv2.imwrite(out_path, output_image)
     print(f"\nSaved visualization to {out_path}")
 
 if __name__ == "__main__":
-    test_aligner()
+    if len(sys.argv) < 2:
+        print("Usage: python test_tick_aligner.py <image_path>")
+        sys.exit(1)
+    test_aligner(sys.argv[1])
