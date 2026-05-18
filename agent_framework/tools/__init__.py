@@ -1,7 +1,7 @@
 from .base import BaseAtomicTool
 from .ocr import OCRTextLocator
 from .axis import AxisTickMapper, AxisLineLocator
-from .extractor import ColorPointExtractor, SAM3BoxExtractor, GridColorSampler
+from .extractor import ColorPointExtractor, SAM3BoxExtractor, PieSliceExtractor, GridColorSampler
 
 __all__ = [
     "BaseAtomicTool",
@@ -10,5 +10,6 @@ __all__ = [
     "AxisLineLocator",
     "ColorPointExtractor",
     "SAM3BoxExtractor",
+    "PieSliceExtractor",
     "GridColorSampler"
 ]

@@ -49,6 +49,29 @@ class SAM3BoxExtractor(BaseAtomicTool):
         # TODO: Implement SAM3 zero-shot segmentation logic
         return []
 
+class PieSliceExtractor(BaseAtomicTool):
+    """
+    Tool for extracting individual slices of a pie chart, capturing their centroid, color, and polygon outline.
+    """
+    name = "pie_slice_extractor"
+    description = (
+        "Extracts pie chart slices. Identifies each slice's geometric centroid, primary color, "
+        "and polygon outline. Useful for matching labels to pie segments."
+    )
+
+    def run(self, image: np.ndarray, target_color: Optional[str] = None, **kwargs) -> List[Dict[str, Any]]:
+        """
+        Args:
+            image (np.ndarray): The input chart image.
+            target_color (str, optional): A specific color to target a single slice. If None, extracts all slices.
+            
+        Returns:
+            List[Dict[str, Any]]: List of slices with centroid, color, and polygon coordinates.
+                Example: [{"centroid": [300, 300], "color": "#ff0000", "polygon": [[250,250], ...]}, ...]
+        """
+        # TODO: Implement slice detection logic (e.g., using SAM3 or color contouring)
+        return []
+
 class GridColorSampler(BaseAtomicTool):
     """
     Tool specifically for heatmaps to sample colors at the center of grid cells.

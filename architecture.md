@@ -104,6 +104,7 @@ x轴为类别轴，从左到右依次为"Fault 1"到"Fault 8"，像素坐标分�
 | `axis_tick_mapper` | 根据给定的文本区，拟合像素与数值的线性/对数关系 | `[{"px": 523, "val": 50}, ...]` | `slope, intercept, scale_type` | `tools/families/scatter_tool.py` 里的 `_build_coord_maps` |
 | `color_point_extractor` | 提取指定颜色或区域内的散点/折线拐点像素坐标 | `image`, `target_color` (可选) | `[{"cx": 167, "cy": 203, "color": "#201955"}, ...]` | `reference/scatter/scatter_tool.py` 里的 `_detect_points` |
 | `sam3_box_extractor` | 利用 SAM3 与文本 Prompt(如 "bar") 提取矩形条的 bbox | `image`, `text_prompt="bar"` | `[[x_min, y_min, x_max, y_max], ...]` | `reference/SAM3/.../sam3_bar_extractor.py` |
+| `pie_slice_extractor` | 提取饼图各个扇形的轮廓、质心与颜色 | `image`, `target_color` (可选) | `[{"centroid": [cx, cy], "color": "#ff0000", "polygon": [...]}, ...]` | `reference/SAM3/.../sam3_pie_extractor.py` |
 | `grid_color_sampler` | (热力图专用) 给定网格行列数和区域，对每个单元格中心点采样颜色 | `image`, `bbox`, `n_rows`, `n_cols` | `[{"row": 0, "col": 1, "color": "#ff0000"}, ...]`| `reference/heatmap/heatmap_tool.py` 的池化逻辑 |
 
 ### 4.2 工具 API 接口规范
