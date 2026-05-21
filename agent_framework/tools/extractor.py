@@ -13,29 +13,80 @@ def _enhance_image(img: Image.Image, color: float = 1.20, contrast: float = 1.20
     img = ImageEnhance.Sharpness(img).enhance(1.05)
     return img
 
-class ColorPointExtractor(BaseAtomicTool):
+class ScatterPointExtractorV1(BaseAtomicTool):
     """
-    Tool for extracting pixel coordinates of scatter points or line chart inflection points 
-    based on a specific color.
+    Tool for detecting scatter points in a chart, extracting their coordinates, 
+    and clustering them by color (V1 using Template Matching + OCR filtering).
     """
-    name = "color_point_extractor"
+    name = "scatter_point_extractor_v1"
     description = (
-        "Extracts pixel coordinates of scattered points or line chart points matching "
-        "a specific target color."
+        "Detects scatter points using template matching and color masking. "
+        "Automatically filters out text using OCR, and clusters the detected points by color."
     )
 
-    def run(self, image: np.ndarray, target_color: Optional[str] = None, **kwargs) -> List[Dict[str, Any]]:
+    def run(self, image: np.ndarray, target_rect: Optional[List[int]] = None, 
+            match_threshold: float = 0.75, color_cluster: float = 15.0, 
+            max_templates: int = 3, s_thresh: int = 30, v_thresh: int = 30, 
+            mask_ratio: float = 0.1, ocr_expand: int = 2, **kwargs) -> Dict[str, Any]:
         """
         Args:
-            image (np.ndarray): The input chart image.
-            target_color (str, optional): Target color in HEX format or color name.
-        
+            image (np.ndarray): The input chart image (BGR format from cv2).
+            target_rect (List[int], optional): Optional [x_min, y_min, x_max, y_max] to restrict detection area.
+            match_threshold (float): NCC template matching threshold.
+            color_cluster (float): Lab space distance threshold for color clustering.
+            
         Returns:
-            List[Dict[str, Any]]: List of points with their coordinates and colors.
-                Example: [{"cx": 167, "cy": 203, "color": "#201955"}, ...]
+            Dict[str, Any]: Contains 'point_count', 'cluster_count', 'points', and 'clusters'.
         """
-        # TODO: Implement color clustering and point detection logic
-        return []
+        from .scatter_utils import build_text_mask_from_ocr, detect_points_template, cluster_colors, rgb_to_hex
+        from .ocr import OCRTextLocator
+        
+        # 1. Run OCR to build text mask
+        ocr_tool = OCRTextLocator()
+        ocr_results = ocr_tool.run(image)
+        text_mask = build_text_mask_from_ocr(image.shape, ocr_results, ocr_expand)
+        
+        # 2. Detect points using template matching
+        points = detect_points_template(
+            image_bgr=image,
+            match_threshold=match_threshold,
+            max_templates=max_templates,
+            s_thresh=s_thresh,
+            v_thresh=v_thresh,
+            mask_ratio=mask_ratio,
+            text_mask=text_mask,
+            target_rect=target_rect
+        )
+        
+        # 3. Cluster colors
+        clusters, assignments = cluster_colors(points, color_cluster)
+        
+        # 4. Format output
+        points_json = []
+        for (x, y, rgb), cluster_id in zip(points, assignments):
+            points_json.append({
+                "x": int(x),
+                "y": int(y),
+                "rgb": [int(v) for v in np.clip(np.round(rgb), 0, 255)],
+                "cluster_id": int(cluster_id),
+            })
+            
+        clusters_json = []
+        for cluster in clusters:
+            mean_rgb = np.clip(np.round(cluster.mean_rgb), 0, 255)
+            clusters_json.append({
+                "id": cluster.id,
+                "mean_rgb": [int(v) for v in mean_rgb],
+                "mean_hex": rgb_to_hex(mean_rgb),
+                "count": cluster.count,
+            })
+            
+        return {
+            "point_count": len(points_json),
+            "cluster_count": len(clusters_json),
+            "points": points_json,
+            "clusters": clusters_json
+        }
 
 class SAM3BoxExtractor(BaseAtomicTool):
     """
