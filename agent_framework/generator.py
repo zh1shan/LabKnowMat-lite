@@ -35,7 +35,8 @@ class CodeGenerator:
             {"role": "user", "content": prompt}
         ]
 
-        response_text = self.llm.chat(messages, temperature=0.2)
+        response_message = self.llm.chat(messages, temperature=0.2)
+        response_text = response_message.get("content", "")
         
         # TODO: Implement robust code extraction from response_text
         return response_text

@@ -56,7 +56,8 @@ class SemanticPlanner:
             }
         ]
 
-        response_text = self.llm.chat(messages, temperature=0.1)
+        response_message = self.llm.chat(messages, temperature=0.1)
+        response_text = response_message.get("content", "")
         
         try:
             # Try to find JSON block using regex if there's surrounding text

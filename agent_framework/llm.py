@@ -1,15 +1,14 @@
 import os
 import requests
+import json
 from typing import List, Dict, Any, Optional
 
 class KimiLLM:
     """
-    Wrapper for interacting with Moonshot AI's Kimi API.
-    Supports both text and image inputs.
+    Wrapper for interacting with Moonshot AI's Kimi API via OpenRouter.
+    Supports both text and image inputs, as well as Tool Calling.
     """
-    def __init__(self, api_key: str = None, model: str = "moonshot-v1-8k"):
-        # The exact model to use is moonshotai/kimi-k2.6, accessed via OpenRouter based on key.txt
-        # URL: https://openrouter.ai/api/v1/chat/completions
+    def __init__(self, api_key: str = None, model: str = "moonshotai/kimi-k2.6"):
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
         self.model = model
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
@@ -17,17 +16,17 @@ class KimiLLM:
         if not self.api_key:
             raise ValueError("API Key must be provided either via argument or environment variable OPENROUTER_API_KEY")
 
-    def chat(self, messages: List[Dict[str, Any]], temperature: float = 0.7) -> str:
+    def chat(self, messages: List[Dict[str, Any]], temperature: float = 0.7, tools: Optional[List[Dict[str, Any]]] = None) -> Any:
         """
         Send a chat completion request to the model.
 
         Args:
             messages (List[Dict[str, Any]]): List of message dictionaries.
-                Can include image URLs for multimodal tasks.
             temperature (float): Sampling temperature.
+            tools (List[Dict[str, Any]], optional): List of tool schemas.
 
         Returns:
-            str: The response text from the model.
+            Any: The response message object from the model, which may contain text content or tool calls.
         """
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -39,15 +38,19 @@ class KimiLLM:
             "messages": messages,
             "temperature": temperature
         }
+        
+        if tools:
+            data["tools"] = tools
+            data["tool_choice"] = "auto"
 
         try:
-            response = requests.post(self.base_url, headers=headers, json=data)
+            response = requests.post(self.base_url, headers=headers, json=data, timeout=60)
             response.raise_for_status()
             result = response.json()
-            return result['choices'][0]['message']['content']
+            # Return the entire message object so we can check for tool_calls
+            return result['choices'][0]['message']
         except Exception as e:
-            # TODO: Add robust error handling and retries
             print(f"LLM API Error: {e}")
             if 'response' in locals() and hasattr(response, 'text'):
                 print(f"Response Content: {response.text}")
-            return ""
+            return {"role": "assistant", "content": f"Error: {e}"}

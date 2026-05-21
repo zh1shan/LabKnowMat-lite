@@ -24,6 +24,27 @@ class ScatterPointExtractorV1(BaseAtomicTool):
         "Automatically filters out text using OCR, and clusters the detected points by color."
     )
 
+    def get_parameters_schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "target_rect": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Optional [x_min, y_min, x_max, y_max] to restrict detection area."
+                },
+                "match_threshold": {
+                    "type": "number",
+                    "description": "NCC template matching threshold. Default is 0.75."
+                },
+                "color_cluster": {
+                    "type": "number",
+                    "description": "Lab space distance threshold for color clustering. Default is 15.0."
+                }
+            },
+            "required": []
+        }
+
     def run(self, image: np.ndarray, target_rect: Optional[List[int]] = None, 
             match_threshold: float = 0.75, color_cluster: float = 15.0, 
             max_templates: int = 3, s_thresh: int = 30, v_thresh: int = 30, 
@@ -101,6 +122,18 @@ class SAM3BoxExtractor(BaseAtomicTool):
 
     def __init__(self):
         self.processor = None
+
+    def get_parameters_schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "text_prompt": {
+                    "type": "string",
+                    "description": "Text prompt guiding the segmentation (default: 'chart bar')."
+                }
+            },
+            "required": []
+        }
 
     def _init_model(self):
         if self.processor is None:
@@ -181,6 +214,22 @@ class PieSliceExtractor(BaseAtomicTool):
     
     def __init__(self):
         self.processor = None
+
+    def get_parameters_schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "target_color": {
+                    "type": "string",
+                    "description": "A specific color in HEX format or color name to target a single slice. If None, extracts all slices."
+                },
+                "text_prompt": {
+                    "type": "string",
+                    "description": "Text prompt guiding the segmentation (default: 'pie chart slice')."
+                }
+            },
+            "required": []
+        }
 
     def _init_model(self):
         if self.processor is None:
@@ -327,6 +376,26 @@ class HeatmapDigitizerTool(BaseAtomicTool):
         "Returns their bounding boxes, the legend orientation, a color-to-value mapping, "
         "and a 128x128 normalized numerical matrix representing the heatmap data."
     )
+
+    def get_parameters_schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "sat_thresh": {
+                    "type": "integer",
+                    "description": "Saturation threshold for region detection. Default is 55."
+                },
+                "val_thresh": {
+                    "type": "integer",
+                    "description": "Value threshold for region detection. Default is 80."
+                },
+                "min_area": {
+                    "type": "integer",
+                    "description": "Minimum area for valid rectangles. Default is 300."
+                }
+            },
+            "required": []
+        }
 
     def run(self, image: np.ndarray, sat_thresh: int = 55, val_thresh: int = 80, min_area: int = 300, **kwargs) -> Dict[str, Any]:
         """

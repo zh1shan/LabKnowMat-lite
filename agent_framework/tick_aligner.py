@@ -76,7 +76,8 @@ class TickAligner:
         )
         
         messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
-        response_text = self.llm.chat(messages, temperature=0.1)
+        response_message = self.llm.chat(messages, temperature=0.1)
+        response_text = response_message.get("content", "")
         
         try:
             match = re.search(r'\[.*\]', response_text, re.DOTALL)
