@@ -265,29 +265,41 @@ class PieSliceExtractor(BaseAtomicTool):
                 
         return results
 
-class GridColorSampler(BaseAtomicTool):
+class HeatmapDigitizerTool(BaseAtomicTool):
     """
-    Tool specifically for heatmaps to sample colors at the center of grid cells.
+    Tool for automatically detecting heatmap and legend regions, and digitizing the heatmap 
+    into a normalized 128x128 numerical matrix.
     """
-    name = "grid_color_sampler"
+    name = "heatmap_digitizer"
     description = (
-        "Samples the color at the center of each cell in a grid area, specifically for heatmaps."
+        "Automatically detects heatmap data and legend regions. "
+        "Returns their bounding boxes, the legend orientation, a color-to-value mapping, "
+        "and a 128x128 normalized numerical matrix representing the heatmap data."
     )
 
-    def run(self, image: np.ndarray, bbox: List[float] = None, n_rows: int = 1, n_cols: int = 1, **kwargs) -> List[Dict[str, Any]]:
+    def run(self, image: np.ndarray, sat_thresh: int = 55, val_thresh: int = 80, min_area: int = 300, **kwargs) -> Dict[str, Any]:
         """
         Args:
             image (np.ndarray): The input chart image.
-            bbox (List[float]): Bounding box of the grid [x_min, y_min, x_max, y_max].
-            n_rows (int): Number of rows in the grid.
-            n_cols (int): Number of columns in the grid.
+            sat_thresh (int): Saturation threshold for region detection.
+            val_thresh (int): Value threshold for region detection.
+            min_area (int): Minimum area for valid rectangles.
             
         Returns:
-            List[Dict[str, Any]]: List of cell samples with row, col, and color.
-                Example: [{"row": 0, "col": 1, "color": "#ff0000"}, ...]
+            Dict[str, Any]: Contains 'heatmap_rect', 'legend_rect', 'legend_orientation',
+                            'color_to_value_map', and 'normalized_matrix'.
         """
-        if bbox is None:
-            return []
+        from .heatmap_utils import detect_regions, extract_heatmap_data
+        
+        try:
+            heatmap_rect, legend_rect, legend_orientation = detect_regions(
+                image, sat_thresh=sat_thresh, val_thresh=val_thresh, min_area=min_area
+            )
+        except ValueError as e:
+            return {"error": str(e)}
             
-        # TODO: Implement grid partitioning and center color sampling logic
-        return []
+        result = extract_heatmap_data(
+            image, heatmap_rect, legend_rect, legend_orientation, output_size=(128, 128)
+        )
+        
+        return result
