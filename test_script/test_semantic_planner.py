@@ -39,14 +39,7 @@ def test_semantic_planner(image_path_arg=None):
 
     # Initialize LLM
     try:
-        # Assuming OPENROUTER_API_KEY is set in environment, or we can read from key.txt
-        key_path = os.path.join(current_dir, "key.txt")
-        api_key = None
-        if os.path.exists(key_path):
-            with open(key_path, "r") as f:
-                api_key = f.readline().strip()
-                
-        llm = KimiLLM(api_key=api_key, model="moonshotai/kimi-k2.6")
+        llm = KimiLLM()
     except Exception as e:
         print(f"Failed to initialize LLM: {e}")
         return

@@ -14,7 +14,7 @@ class LabKnowMatLiteAgent:
     The main orchestrator for the LabKnowMat-lite system.
     Implements Phase 2 (Iterative Annotation) using ReAct workflow.
     """
-    def __init__(self, api_key: str = None, model: str = "moonshotai/kimi-k2.6"):
+    def __init__(self, api_key: str = None, model: str = None):
         self.llm = KimiLLM(api_key=api_key, model=model)
         self.planner = SemanticPlanner(self.llm)
         self.generator = CodeGenerator(self.llm)

@@ -33,16 +33,8 @@ def test_workflow(image_path_arg=None):
     image_url = f"data:image/jpeg;base64,{base64_image}"
     
     # Initialize Agent
-    key_path = os.path.join(project_root, "key.txt")
-    api_key = None
-    if os.path.exists(key_path):
-        with open(key_path, "r") as f:
-            lines = f.readlines()
-            if lines:
-                api_key = lines[0].strip()
-            
     try:
-        agent = LabKnowMatLiteAgent(api_key=api_key)
+        agent = LabKnowMatLiteAgent()
         
         result = agent.process_chart(sample_image_path, image_url)
         

@@ -3,15 +3,24 @@ import requests
 import json
 from typing import List, Dict, Any, Optional
 
+try:
+    from dotenv import load_dotenv
+    # Load .env file from project root if available
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    dotenv_path = os.path.join(current_dir, "..", ".env")
+    load_dotenv(dotenv_path)
+except ImportError:
+    pass
+
 class KimiLLM:
     """
     Wrapper for interacting with Moonshot AI's Kimi API via OpenRouter.
     Supports both text and image inputs, as well as Tool Calling.
     """
-    def __init__(self, api_key: str = None, model: str = "moonshotai/kimi-k2.6"):
+    def __init__(self, api_key: str = None, model: str = None, base_url: str = None):
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
-        self.model = model
-        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.model = model or os.environ.get("LLM_MODEL", "moonshotai/kimi-k2.6")
+        self.base_url = base_url or os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1/chat/completions")
 
         if not self.api_key:
             raise ValueError("API Key must be provided either via argument or environment variable OPENROUTER_API_KEY")
