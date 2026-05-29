@@ -7,6 +7,8 @@ from .planner import SemanticPlanner
 from .tools.ocr import OCRTextLocator
 from .tools.axis import AxisLineLocator
 from .tools.extractor import ScatterPointExtractorV1, SAM3BoxExtractor, PieSliceExtractor, HeatmapDigitizerTool
+from .tools.color_cluster_sampler import ColorClusterPointSampler
+from .tools.color_cluster_counter import ColorClusterPixelCounter
 
 class LabKnowMatLiteAgent:
     """
@@ -24,7 +26,9 @@ class LabKnowMatLiteAgent:
             "scatter_point_extractor_v1": ScatterPointExtractorV1(),
             "sam3_box_extractor": SAM3BoxExtractor(),
             "pie_slice_extractor": PieSliceExtractor(),
-            "heatmap_digitizer": HeatmapDigitizerTool()
+            "heatmap_digitizer": HeatmapDigitizerTool(),
+            "color_cluster_point_sampler": ColorClusterPointSampler(),
+            "color_cluster_pixel_counter": ColorClusterPixelCounter()
         }
 
     def process_chart(self, image_path: str, image_url_or_base64: str) -> Dict[str, Any]:
