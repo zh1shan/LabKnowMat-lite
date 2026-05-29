@@ -4,18 +4,51 @@ from typing import Dict, Any, List
 from .base import BaseAtomicTool
 from ._color_cluster_utils import extract_colors_density
 
+def farthest_point_sampling(coords: List[List[int]], num_samples: int) -> List[List[int]]:
+    """
+    Sample `num_samples` points from `coords` using Farthest Point Sampling.
+    """
+    if len(coords) <= num_samples:
+        return coords
+
+    coords_arr = np.array(coords)
+    num_points = coords_arr.shape[0]
+    
+    # Randomly select the first point
+    first_idx = np.random.randint(0, num_points)
+    sampled_indices = [first_idx]
+    
+    # Initialize distances to infinity
+    distances = np.full(num_points, np.inf)
+    
+    for _ in range(1, num_samples):
+        # Update distances based on the newly added point
+        last_added_point = coords_arr[sampled_indices[-1]]
+        
+        # Calculate squared Euclidean distances from the newly added point to all points
+        current_distances = np.sum((coords_arr - last_added_point) ** 2, axis=1)
+        
+        # Keep the minimum distance to the sampled set
+        distances = np.minimum(distances, current_distances)
+        
+        # Choose the point that is farthest away from the sampled set
+        next_idx = np.argmax(distances)
+        sampled_indices.append(int(next_idx))
+        
+    return coords_arr[sampled_indices].tolist()
+
 class ColorClusterPointSampler(BaseAtomicTool):
     """
-    Extracts physical coordinate points for N specific colors by random sampling 
+    Extracts physical coordinate points for N specific colors by evenly sampling (Farthest Point Sampling)
     from the highest density core color areas.
     """
     name: str = "color_cluster_point_sampler"
     description: str = (
         "Extracts physical coordinate points (x,y) for specific colors. "
-        "Useful for line charts to sample physical points on lines of different colors. "
+        "Useful for line charts to sample physical points on lines of different colors evenly. "
         "Note: DO NOT use this for Scatter plots. If it is a Scatter plot, "
         "please prioritize using scatter_point_extractor_v1 instead. "
-        "Returns the mean RGB color of each cluster and a list of sampled (x,y) physical coordinates."
+        "Returns the mean RGB color of each cluster and a list of evenly sampled (x,y) physical coordinates."
     )
 
     def run(self, image: np.ndarray, num_colors: int, sample_size: int, core_ratio: float = 0.5, target_rect: List[int] = None) -> Dict[str, Any]:
@@ -55,9 +88,9 @@ class ColorClusterPointSampler(BaseAtomicTool):
             mean_rgb = res['mean_rgb']
             core_coords = res['core_coords']
             
-            # Sample coordinates
+            # Sample coordinates evenly using Farthest Point Sampling
             if len(core_coords) > sample_size:
-                sampled_coords = random.sample(core_coords, sample_size)
+                sampled_coords = farthest_point_sampling(core_coords, sample_size)
             else:
                 sampled_coords = core_coords
                 
@@ -79,7 +112,7 @@ class ColorClusterPointSampler(BaseAtomicTool):
                 },
                 "sample_size": {
                     "type": "integer",
-                    "description": "The number of points to randomly sample from the core pixels for each color (n). Decide based on chart complexity."
+                    "description": "The number of points to evenly sample from the core pixels for each color (n). Decide based on chart complexity."
                 },
                 "core_ratio": {
                     "type": "number",
