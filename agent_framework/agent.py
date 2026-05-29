@@ -78,6 +78,7 @@ class LabKnowMatLiteAgent:
         
         max_iterations = 10
         final_annotation_text = ""
+        extra_data = {}
         
         for iteration in range(max_iterations):
             print(f"\n[Iteration {iteration+1}] LLM is thinking...")
@@ -105,6 +106,11 @@ class LabKnowMatLiteAgent:
                         try:
                             # Execute local Python tool, injecting the image array
                             result = tool_instance.run(image=image_array, **arguments)
+                            
+                            if isinstance(result, dict) and "normalized_matrix" in result:
+                                extra_data["heatmap_data.json"] = result.pop("normalized_matrix")
+                                result["normalized_matrix_info"] = "Data is too large. It has been extracted and will be saved as 'heatmap_data.json'. Please instruct the reconstruction script to load this file."
+                                
                             # Convert result to string to pass back to LLM
                             result_str = json.dumps(result, ensure_ascii=False)[:4000] # truncate if too long
                             if len(json.dumps(result)) > 4000:
@@ -129,5 +135,6 @@ class LabKnowMatLiteAgent:
 
         return {
             "semantic_structure": structure,
-            "annotation_text": final_annotation_text
+            "annotation_text": final_annotation_text,
+            "extra_data": extra_data
         }

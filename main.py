@@ -12,9 +12,13 @@ class StreamTee:
     def __init__(self, stream, file_handle):
         self.stream = stream
         self.file_handle = file_handle
+        self.encoding = getattr(stream, 'encoding', 'utf-8') or 'utf-8'
 
     def write(self, message):
-        self.stream.write(message)
+        try:
+            self.stream.write(message)
+        except UnicodeEncodeError:
+            self.stream.write(message.encode(self.encoding, errors='replace').decode(self.encoding, errors='replace'))
         self.file_handle.write(message)
         self.file_handle.flush()
 
@@ -81,6 +85,15 @@ def main():
             f.write(result["annotation_text"])
         
         print(f"\nSuccessfully saved annotation text to {info_file_path}")
+        
+        # Save extra data files
+        import json
+        extra_data = result.get("extra_data", {})
+        for filename, content in extra_data.items():
+            file_path = os.path.join(output_dir, filename)
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(content, f, ensure_ascii=False)
+            print(f"Successfully saved extra data to {file_path}")
         
         # Phase 3: Execute Chart Reconstruction
         from agent_framework.generator import CodeGenerator
