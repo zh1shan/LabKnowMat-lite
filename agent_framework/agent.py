@@ -44,6 +44,9 @@ class LabKnowMatLiteAgent:
         print("\n=== Phase 1: Parsing Semantic Structure ===")
         structure = self.planner.parse_chart_structure(image_url_or_base64)
         print(f"Structure:\n{json.dumps(structure, indent=2, ensure_ascii=False)}")
+        
+        if "error" in structure:
+            raise RuntimeError(f"Phase 1 failed to parse semantic structure: {structure['error']}. Raw response: {structure.get('raw', '')}")
 
         print("\n=== Phase 2: Iterative Annotation (ReAct Workflow) ===")
         # Prepare system prompt and tools schema

@@ -52,14 +52,21 @@ class KimiLLM:
             data["tools"] = tools
             data["tool_choice"] = "auto"
 
-        try:
-            response = requests.post(self.base_url, headers=headers, json=data, timeout=60)
-            response.raise_for_status()
-            result = response.json()
-            # Return the entire message object so we can check for tool_calls
-            return result['choices'][0]['message']
-        except Exception as e:
-            print(f"LLM API Error: {e}")
-            if 'response' in locals() and hasattr(response, 'text'):
-                print(f"Response Content: {response.text}")
-            return {"role": "assistant", "content": f"Error: {e}"}
+        max_retries = 3
+        import time
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(self.base_url, headers=headers, json=data, timeout=60)
+                response.raise_for_status()
+                result = response.json()
+                # Return the entire message object so we can check for tool_calls
+                return result['choices'][0]['message']
+            except Exception as e:
+                print(f"LLM API Error on attempt {attempt + 1}: {e}")
+                if attempt < max_retries - 1:
+                    print(f"Retrying in {2 ** attempt} seconds...")
+                    time.sleep(2 ** attempt)
+                else:
+                    if 'response' in locals() and hasattr(response, 'text'):
+                        print(f"Response Content: {response.text}")
+                    return {"role": "assistant", "content": f"Error: {e}"}
