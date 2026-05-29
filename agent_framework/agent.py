@@ -4,7 +4,6 @@ import json
 from typing import Dict, Any, List
 from .llm import KimiLLM
 from .planner import SemanticPlanner
-from .generator import CodeGenerator
 from .tools.ocr import OCRTextLocator
 from .tools.axis import AxisLineLocator
 from .tools.extractor import ScatterPointExtractorV1, SAM3BoxExtractor, PieSliceExtractor, HeatmapDigitizerTool
@@ -17,7 +16,6 @@ class LabKnowMatLiteAgent:
     def __init__(self, api_key: str = None, model: str = None):
         self.llm = KimiLLM(api_key=api_key, model=model)
         self.planner = SemanticPlanner(self.llm)
-        self.generator = CodeGenerator(self.llm)
         
         # Initialize tool library
         self.tools = {
@@ -129,12 +127,7 @@ class LabKnowMatLiteAgent:
                 print("LLM finished tool calling. Final Output received.")
                 break
 
-        print("\n=== Phase 3: Code Generation ===")
-        # code = self.generator.generate_reconstruction_code(final_annotation_text)
-        code = "# Code generation temporarily bypassed for tool testing."
-
         return {
             "semantic_structure": structure,
-            "annotation_text": final_annotation_text,
-            "reconstruction_code": code
+            "annotation_text": final_annotation_text
         }

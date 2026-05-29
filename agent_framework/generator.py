@@ -1,42 +1,75 @@
+import os
+import re
+import subprocess
 from .llm import KimiLLM
-from typing import Dict, Any
 
 class CodeGenerator:
     """
-    Phase 3: Synthesizes the extracted annotations and generates the Python reconstruction script.
+    Phase 4: Synthesizes the extracted annotations and generates the Python reconstruction script,
+    then executes it to render the final chart.
     """
-    def __init__(self, llm: KimiLLM):
-        self.llm = llm
+    def __init__(self, api_key: str = None, model: str = None):
+        # By default use the Phase 4 model
+        model = model or os.environ.get("LLM_MODEL_PHASE_4", "google/gemini-3.1-pro-preview")
+        self.llm = KimiLLM(api_key=api_key, model=model)
 
-    def generate_reconstruction_code(self, annotate_text: str) -> str:
+    def generate_and_run_code(self, info_txt_path: str, output_dir: str) -> None:
         """
-        Takes the synthesized annotate.txt content and generates a render_chart.py script.
+        Reads info.txt, asks the LLM to write a Python script, saves it, and executes it.
+        """
+        with open(info_txt_path, "r", encoding="utf-8") as f:
+            annotate_text = f.read()
 
-        Args:
-            annotate_text (str): Natural language + coordinate descriptions of the chart.
-        
-        Returns:
-            str: The generated Python code for rendering the chart.
-        """
         prompt = (
             "You are an expert Python data visualization developer. "
-            "I will provide you with a structured description of a chart, including its components, "
-            "colors, and the raw pixel coordinates of its data points/bars.\n\n"
-            "Your task is to:\n"
-            "1. Map the pixel coordinates to actual numerical values based on the described axes.\n"
-            "2. Write a Python script using Matplotlib or Seaborn that rebuilds this chart as accurately as possible.\n"
-            "3. Ensure colors, labels, and legends match the description.\n\n"
+            "Based on the description in the provided text, write a Python script using matplotlib to render the chart as accurately as possible.\n\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "1. You must think step-by-step (Chain of Thought) before writing the code. Think about how to map pixel coordinates to actual numerical values, how to use scipy.optimize.curve_fit for the trend line, and how to style the plot.\n"
+            "2. Ensure colors, labels, and legends strictly match the description.\n"
+            "3. You MUST include logic to save the figure to the current directory as 'chart.png'. For example: plt.savefig('chart.png', bbox_inches='tight'). Do not use plt.show().\n"
+            "4. Only output the Python code inside ```python ... ``` block. Do not output anything else outside of the thinking block and code block.\n\n"
             "Here is the chart description:\n"
-            f"```text\n{annotate_text}\n```\n\n"
-            "Please output only the Python code enclosed in ```python ... ``` blocks."
+            f"```text\n{annotate_text}\n```\n"
         )
 
         messages = [
             {"role": "user", "content": prompt}
         ]
-
+        
+        print(f"\n=== Phase 4: Chart Reconstruction ===")
+        print(f"[Phase 4] LLM ({self.llm.model}) is thinking and generating code...")
         response_message = self.llm.chat(messages, temperature=0.2)
         response_text = response_message.get("content", "")
         
-        # TODO: Implement robust code extraction from response_text
-        return response_text
+        # Extract python code
+        match = re.search(r'```python\n(.*?)\n```', response_text, re.DOTALL)
+        if match:
+            code = match.group(1)
+        else:
+            print("[Phase 4 Error] Failed to extract Python code from response.")
+            print(f"Raw response:\n{response_text}")
+            return
+            
+        script_path = os.path.join(output_dir, "render_chart.py")
+        with open(script_path, "w", encoding="utf-8") as f:
+            f.write(code)
+            
+        print(f"[Phase 4] Generated script saved to {script_path}")
+        print("[Phase 4] Executing the script...")
+        
+        try:
+            result = subprocess.run(
+                ["python", "render_chart.py"],
+                cwd=output_dir,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            print("[Phase 4] Script executed successfully. Chart saved as chart.png")
+            if result.stdout:
+                print(f"Stdout:\n{result.stdout}")
+        except subprocess.CalledProcessError as e:
+            print(f"[Phase 4 Error] Script execution failed with exit code {e.returncode}.")
+            print(f"Stdout:\n{e.stdout}")
+            print(f"Stderr:\n{e.stderr}")
+
