@@ -48,7 +48,8 @@ class ColorClusterPointSampler(BaseAtomicTool):
         "Useful for line charts to sample physical points on lines of different colors evenly. "
         "Note: DO NOT use this for Scatter plots. If it is a Scatter plot, "
         "please prioritize using scatter_point_extractor_v1 instead. "
-        "Returns the mean RGB color of each cluster and a list of evenly sampled (x,y) physical coordinates."
+        "Returns the mean RGB color of each cluster and a list of evenly sampled (x,y) physical coordinates. "
+        "Recommendation: Set sample_size to be no less than 20."
     )
 
     def run(self, image: np.ndarray, num_colors: int, sample_size: int, core_ratio: float = 0.5, target_rect: List[int] = None) -> Dict[str, Any]:
@@ -58,7 +59,7 @@ class ColorClusterPointSampler(BaseAtomicTool):
         Args:
             image (np.ndarray): The input chart image (BGR or RGB).
             num_colors (int): The number of colors to cluster into (c).
-            sample_size (int): Number of points to randomly sample from the core pixels (n).
+            sample_size (int): Number of points to evenly sample from the core pixels (n). Recommended >= 20.
             core_ratio (float): Ratio of core pixels to extract. Defaults to 0.5.
             target_rect (List[int]): Optional [x_min, y_min, x_max, y_max].
 
@@ -112,7 +113,7 @@ class ColorClusterPointSampler(BaseAtomicTool):
                 },
                 "sample_size": {
                     "type": "integer",
-                    "description": "The number of points to evenly sample from the core pixels for each color (n). Decide based on chart complexity."
+                    "description": "The number of points to evenly sample from the core pixels for each color (n). Decide based on chart complexity, but it is recommended to be no less than 20 to ensure sufficient trend capture."
                 },
                 "core_ratio": {
                     "type": "number",
