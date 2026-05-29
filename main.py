@@ -82,7 +82,7 @@ def main():
         
         print(f"\nSuccessfully saved annotation text to {info_file_path}")
         
-        # Phase 4: Execute Chart Reconstruction
+        # Phase 3: Execute Chart Reconstruction
         from agent_framework.generator import CodeGenerator
         generator = CodeGenerator()
         generator.generate_and_run_code(info_file_path, output_dir)

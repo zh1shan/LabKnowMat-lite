@@ -5,12 +5,12 @@ from .llm import KimiLLM
 
 class CodeGenerator:
     """
-    Phase 4: Synthesizes the extracted annotations and generates the Python reconstruction script,
+    Phase 3: Synthesizes the extracted annotations and generates the Python reconstruction script,
     then executes it to render the final chart.
     """
     def __init__(self, api_key: str = None, model: str = None):
-        # By default use the Phase 4 model
-        model = model or os.environ.get("LLM_MODEL_PHASE_4", "google/gemini-3.1-pro-preview")
+        # By default use the Phase 3 model
+        model = model or os.environ.get("LLM_MODEL_PHASE_3", "google/gemini-3.1-pro-preview")
         self.llm = KimiLLM(api_key=api_key, model=model)
 
     def generate_and_run_code(self, info_txt_path: str, output_dir: str) -> None:
@@ -36,8 +36,8 @@ class CodeGenerator:
             {"role": "user", "content": prompt}
         ]
         
-        print(f"\n=== Phase 4: Chart Reconstruction ===")
-        print(f"[Phase 4] LLM ({self.llm.model}) is thinking and generating code...")
+        print(f"\n=== Phase 3: Chart Reconstruction ===")
+        print(f"[Phase 3] LLM ({self.llm.model}) is thinking and generating code...")
         response_message = self.llm.chat(messages, temperature=0.2)
         response_text = response_message.get("content", "")
         
@@ -46,7 +46,7 @@ class CodeGenerator:
         if match:
             code = match.group(1)
         else:
-            print("[Phase 4 Error] Failed to extract Python code from response.")
+            print("[Phase 3 Error] Failed to extract Python code from response.")
             print(f"Raw response:\n{response_text}")
             return
             
@@ -54,8 +54,8 @@ class CodeGenerator:
         with open(script_path, "w", encoding="utf-8") as f:
             f.write(code)
             
-        print(f"[Phase 4] Generated script saved to {script_path}")
-        print("[Phase 4] Executing the script...")
+        print(f"[Phase 3] Generated script saved to {script_path}")
+        print("[Phase 3] Executing the script...")
         
         try:
             result = subprocess.run(
@@ -65,11 +65,11 @@ class CodeGenerator:
                 text=True,
                 check=True
             )
-            print("[Phase 4] Script executed successfully. Chart saved as chart.png")
+            print("[Phase 3] Script executed successfully. Chart saved as chart.png")
             if result.stdout:
                 print(f"Stdout:\n{result.stdout}")
         except subprocess.CalledProcessError as e:
-            print(f"[Phase 4 Error] Script execution failed with exit code {e.returncode}.")
+            print(f"[Phase 3 Error] Script execution failed with exit code {e.returncode}.")
             print(f"Stdout:\n{e.stdout}")
             print(f"Stderr:\n{e.stderr}")
 
