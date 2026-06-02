@@ -150,7 +150,8 @@ class SAM3BoxExtractor(BaseAtomicTool):
             from sam3.model.sam3_image_processor import Sam3Processor
             
             model = build_sam3_image_model()
-            self.processor = Sam3Processor(model)
+            device = next(model.parameters()).device
+            self.processor = Sam3Processor(model, device=device)
 
     def run(self, image: np.ndarray, text_prompt: str = "chart bar", **kwargs) -> List[List[float]]:
         """
@@ -245,7 +246,8 @@ class PieSliceExtractor(BaseAtomicTool):
             from sam3.model.sam3_image_processor import Sam3Processor
             
             model = build_sam3_image_model()
-            self.processor = Sam3Processor(model)
+            device = next(model.parameters()).device
+            self.processor = Sam3Processor(model, device=device)
 
     def run(self, image: np.ndarray, target_color: Optional[str] = None, text_prompt: str = "pie chart slice", **kwargs) -> List[Dict[str, Any]]:
         """
