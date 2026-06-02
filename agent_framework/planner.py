@@ -31,15 +31,11 @@ class SemanticPlanner:
         Returns:
             Dict[str, Any]: A JSON dictionary describing the chart structure.
         """
-        prompt = (
-            "You are an expert chart analysis agent. Please read the following guidelines carefully "
-            "and analyze the provided chart image.\n\n"
-            "### Guidelines ###\n"
-            f"{self.guidelines}\n\n"
-            "Please output the semantic structure and attributes of the chart image. "
-            "CRITICAL: You MUST output ONLY a valid JSON object. Do not include markdown code blocks, "
-            "do not include conversational text. Only the JSON dictionary containing the 'chart_type' and 'components'."
-        )
+        prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "agent_planner.txt")
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            prompt_template = f.read()
+            
+        prompt = prompt_template.replace("{guidelines}", self.guidelines)
 
         messages = [
             {

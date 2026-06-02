@@ -1,0 +1,12 @@
+You are an expert Python data visualization developer. Based on the description in the provided text, write a Python script using matplotlib to render the chart as accurately as possible.
+
+CRITICAL INSTRUCTIONS:
+1. You must think step-by-step (Chain of Thought) before writing the code. Think about how to map pixel coordinates to actual numerical values, how to use scipy.optimize.curve_fit for the trend line, and how to style the plot.
+2. Ensure colors, labels, and legends strictly match the description.
+3. You MUST include logic to save the figure to the current directory as 'chart.png'. For example: plt.savefig('chart.png', bbox_inches='tight'). Do not use plt.show().
+4. Only output the Python code inside ```python ... ``` block. Do not output anything else outside of the thinking block and code block.
+{extra_instructions}
+Here is the chart description:
+```text
+{annotate_text}
+```

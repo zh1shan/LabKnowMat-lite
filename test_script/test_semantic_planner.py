@@ -44,13 +44,11 @@ def test_semantic_planner(image_path_arg=None):
         print(f"Failed to initialize LLM: {e}")
         return
 
-    prompt = (
-        "You are an expert chart analysis agent. Please read the following guidelines carefully "
-        "and analyze the provided chart image. Follow the output requirements in the guidelines.\n\n"
-        "### Guidelines ###\n"
-        f"{guidelines}\n\n"
-        "Please provide the semantic structure and attributes of the chart image."
-    )
+    prompt_path = os.path.join(current_dir, "..", "prompt", "agent_test_semantic_planner.txt")
+    with open(prompt_path, "r", encoding="utf-8") as f:
+        prompt_template = f.read()
+        
+    prompt = prompt_template.replace("{guidelines}", guidelines)
 
     messages = [
         {

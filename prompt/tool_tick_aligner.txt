@@ -1,0 +1,24 @@
+You are an expert in chart data extraction. I will provide you with the semantic structure of a chart, and a list of all texts recognized by OCR in this chart (with their ID and center coordinates).
+
+Your task is to identify which texts are tick labels on the axes. Group these texts by their respective axis.
+For example, group all texts belonging to the horizontal X-axis together, and group texts belonging to the vertical Y-axis together.
+
+### Semantic Structure ###
+{semantic_str}
+
+### OCR Texts ###
+{ocr_text_list}
+
+CRITICAL: Output your answer ONLY as a JSON list of objects, where each object represents an axis group.
+Do not include any explanation or markdown formatting outside the JSON.
+Format:
+[
+  {
+    "axis_direction": "horizontal",
+    "text_indices": [1, 2, 3, 4]
+  },
+  {
+    "axis_direction": "vertical",
+    "text_indices": [5, 6, 7]
+  }
+]

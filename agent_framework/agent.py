@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import json
+import os
 from typing import Dict, Any, List
 from .llm import KimiLLM
 from .planner import SemanticPlanner
@@ -54,27 +55,22 @@ class LabKnowMatLiteAgent:
         # Prepare system prompt and tools schema
         tool_schemas = [tool.get_tool_schema() for tool in self.tools.values()]
         
-        system_prompt = (
-            "You are an autonomous chart analysis agent operating in a ReAct loop. "
-            "Your goal is to extract the exact pixel coordinates and colors of all visual elements in a chart.\n"
-            "You have access to several specialized atomic tools. You must invoke them to gather information.\n\n"
-            "### Current Chart Semantic Structure ###\n"
-            f"{json.dumps(structure, ensure_ascii=False)}\n\n"
-            "### Instructions ###\n"
-            "1. Analyze the semantic structure above.\n"
-            "2. Decide which tools to call. You can make multiple tool calls in parallel if needed.\n"
-            "3. After gathering all necessary coordinates and colors for every component, "
-            "write a comprehensive final report describing the chart's components, axes mapping, "
-            "and the pixel coordinates of the data points/bars/slices. This report should look like the 'annotate.txt' format.\n"
-            "4. Do NOT guess coordinates. You must use tools to find them.\n"
-        )
+        prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "agent_react_system.txt")
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            system_prompt_template = f.read()
+            
+        system_prompt = system_prompt_template.replace("{structure}", json.dumps(structure, ensure_ascii=False))
+        
+        user_prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "agent_react_user.txt")
+        with open(user_prompt_path, "r", encoding="utf-8") as f:
+            user_prompt = f.read()
         
         messages = [
             {"role": "system", "content": system_prompt},
             {
                 "role": "user", 
                 "content": [
-                    {"type": "text", "text": "Please begin extracting coordinates using your tools."},
+                    {"type": "text", "text": user_prompt},
                     {"type": "image_url", "image_url": {"url": image_url_or_base64}}
                 ]
             }

@@ -1,6 +1,7 @@
 import json
 import re
 import math
+import os
 from typing import Dict, Any, List
 from .llm import KimiLLM
 
@@ -51,29 +52,11 @@ class TickAligner:
             
         semantic_str = json.dumps(semantic_info, indent=2, ensure_ascii=False)
         
-        prompt = (
-            "You are an expert in chart data extraction. I will provide you with the semantic structure of a chart, "
-            "and a list of all texts recognized by OCR in this chart (with their ID and center coordinates).\n\n"
-            "Your task is to identify which texts are tick labels on the axes. Group these texts by their respective axis.\n"
-            "For example, group all texts belonging to the horizontal X-axis together, and group texts belonging to the vertical Y-axis together.\n\n"
-            "### Semantic Structure ###\n"
-            f"{semantic_str}\n\n"
-            "### OCR Texts ###\n"
-            f"{ocr_text_list}\n\n"
-            "CRITICAL: Output your answer ONLY as a JSON list of objects, where each object represents an axis group.\n"
-            "Do not include any explanation or markdown formatting outside the JSON.\n"
-            "Format:\n"
-            "[\n"
-            "  {\n"
-            "    \"axis_direction\": \"horizontal\",\n"
-            "    \"text_indices\": [1, 2, 3, 4]\n"
-            "  },\n"
-            "  {\n"
-            "    \"axis_direction\": \"vertical\",\n"
-            "    \"text_indices\": [5, 6, 7]\n"
-            "  }\n"
-            "]\n"
-        )
+        prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "tool_tick_aligner.txt")
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            prompt_template = f.read()
+            
+        prompt = prompt_template.replace("{semantic_str}", semantic_str).replace("{ocr_text_list}", ocr_text_list)
         
         messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
         response_message = self.llm.chat(messages, temperature=0.1)

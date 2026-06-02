@@ -31,18 +31,11 @@ class CodeGenerator:
                 "STRICTLY FORBIDDEN to generate random, synthetic, or Gaussian data using numpy. You must use the data from the json file.\n"
             )
 
-        prompt = (
-            "You are an expert Python data visualization developer. "
-            "Based on the description in the provided text, write a Python script using matplotlib to render the chart as accurately as possible.\n\n"
-            "CRITICAL INSTRUCTIONS:\n"
-            "1. You must think step-by-step (Chain of Thought) before writing the code. Think about how to map pixel coordinates to actual numerical values, how to use scipy.optimize.curve_fit for the trend line, and how to style the plot.\n"
-            "2. Ensure colors, labels, and legends strictly match the description.\n"
-            "3. You MUST include logic to save the figure to the current directory as 'chart.png'. For example: plt.savefig('chart.png', bbox_inches='tight'). Do not use plt.show().\n"
-            "4. Only output the Python code inside ```python ... ``` block. Do not output anything else outside of the thinking block and code block.\n"
-            f"{extra_instructions}\n"
-            "Here is the chart description:\n"
-            f"```text\n{annotate_text}\n```\n"
-        )
+        prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "agent_generator.txt")
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            prompt_template = f.read()
+            
+        prompt = prompt_template.replace("{extra_instructions}", extra_instructions).replace("{annotate_text}", annotate_text)
 
         messages = [
             {"role": "user", "content": prompt}
