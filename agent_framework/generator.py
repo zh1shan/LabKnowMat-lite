@@ -67,7 +67,12 @@ class CodeGenerator:
                 text=True,
                 check=True
             )
-            print("[Phase 3] Script executed successfully. Chart saved as chart.png")
+            print("[Phase 3] Script executed successfully.")
+            csv_path = os.path.join(output_dir, "data.csv")
+            if os.path.exists(csv_path):
+                print(f"[Phase 3] Chart saved as chart.png, data exported to data.csv")
+            else:
+                print(f"[Phase 3] Chart saved as chart.png (Warning: data.csv was not generated)")
             if result.stdout:
                 print(f"Stdout:\n{result.stdout}")
         except subprocess.CalledProcessError as e:
