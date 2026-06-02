@@ -24,12 +24,9 @@ class CodeGenerator:
         extra_instructions = ""
         heatmap_data_path = os.path.join(output_dir, "heatmap_data.json")
         if os.path.exists(heatmap_data_path):
-            extra_instructions += (
-                "5. IMPORTANT FOR HEATMAP: A file named 'heatmap_data.json' exists in the current directory. "
-                "It contains the raw normalized matrix data formatted as a 2D JSON array (a list of lists of floats) with dimensions 128x128. "
-                "You MUST load this file using `import json` and use it as the actual data source (Z matrix) for your heatmap. "
-                "STRICTLY FORBIDDEN to generate random, synthetic, or Gaussian data using numpy. You must use the data from the json file.\n"
-            )
+            heatmap_prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "agent_generator_heatmap.txt")
+            with open(heatmap_prompt_path, "r", encoding="utf-8") as f:
+                extra_instructions += f.read() + "\n"
 
         prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "agent_generator.txt")
         with open(prompt_path, "r", encoding="utf-8") as f:
