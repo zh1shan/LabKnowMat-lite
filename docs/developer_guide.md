@@ -74,3 +74,9 @@
 ### 4.4 测试准则
 - 每次开发完新工具后，必须在 `test_script/` 下编写以该工具为单位的独立测试用例（如 `test_ocr.py`, `test_scatter.py`）。
 - 测试用例必须生成可视化的输出图像（如画上 Bounding Box，标出质心与 RGB 颜色值等），并在肉眼核对通过后再将其整合至主链路。
+
+### 4.5 提示词 (Prompt) 管理规范
+- **禁止硬编码**：任何发给大模型（LLM/VLM）的自然语言提示词（Prompt），不论长短，**绝不允许**直接硬编码在 Python 源文件中。
+- **集中存储**：必须将所有的 Prompt 模板存储于项目根目录的 `prompt/` 文件夹下，以 `.txt` 格式保存。
+- **命名规范**：遵循 `<所属类型>_<功能描述>.txt` 的命名规则（例如 `agent_react_system.txt`, `tool_tick_aligner.txt`）。
+- **变量注入**：在 Python 中使用 `os.path.join(..., "prompt", "xxx.txt")` 加载模板内容后，使用字符串的 `.replace("{variable_name}", value)` 方法进行动态变量注入。**不要**使用原生的 `string.format()`，因为原始 Prompt 中往往包含给 LLM 示例的 JSON 格式要求（如大量的 `{` 和 `}`），使用 `.format()` 会引发极其繁琐的转义问题，破坏文本的纯净度。
