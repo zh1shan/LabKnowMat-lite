@@ -30,6 +30,8 @@ def main():
     parser = argparse.ArgumentParser(description="LabKnowMat-lite Chart Processing CLI")
     parser.add_argument("-i", "--img", required=True, help="Path to the original chart image")
     parser.add_argument("-o", "--out", required=True, help="Output folder path")
+    parser.add_argument("-v", "--visualize", action="store_true",
+                        help="Enable tool call visualization (saves per-call images to tool_call_history/)")
     args = parser.parse_args()
 
     image_path = os.path.abspath(args.img)
@@ -69,7 +71,7 @@ def main():
         image_url = f"data:image/jpeg;base64,{base64_image}"
 
         # Initialize Agent
-        agent = LabKnowMatLiteAgent()
+        agent = LabKnowMatLiteAgent(visualize=args.visualize, output_dir=output_dir)
         
         result = agent.process_chart(image_path, image_url)
         

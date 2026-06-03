@@ -16,9 +16,23 @@ class LabKnowMatLiteAgent:
     The main orchestrator for the LabKnowMat-lite system.
     Implements Phase 2 (Iterative Annotation) using ReAct workflow.
     """
-    def __init__(self, api_key: str = None, model: str = None):
+    def __init__(self, api_key: str = None, model: str = None,
+                 visualize: bool = False, output_dir: str = None):
         self.llm = KimiLLM(api_key=api_key, model=model)
         self.planner = SemanticPlanner(self.llm)
+        
+        # Pre-import torch to avoid DLL conflicts with PaddlePaddle (loaded by OCR)
+        try:
+            import torch
+        except ImportError:
+            pass
+        
+        self.visualize = visualize
+        self.visualizer = None
+        if self.visualize and output_dir:
+            from .visualizer import ToolCallVisualizer
+            vis_dir = os.path.join(output_dir, "tool_call_history")
+            self.visualizer = ToolCallVisualizer(vis_dir)
         
         # Initialize tool library
         self.tools = {
@@ -79,6 +93,7 @@ class LabKnowMatLiteAgent:
         max_iterations = 10
         final_annotation_text = ""
         extra_data = {}
+        call_counter = 0
         
         for iteration in range(max_iterations):
             print(f"\n[Iteration {iteration+1}] LLM is thinking...")
@@ -111,15 +126,49 @@ class LabKnowMatLiteAgent:
                                 extra_data["heatmap_data.json"] = result.pop("normalized_matrix")
                                 result["normalized_matrix_info"] = "Data is too large. It has been extracted and will be saved as 'heatmap_data.json'. Please instruct the reconstruction script to load this file."
                                 
+                            # Save tool call visualization
+                            if self.visualize and self.visualizer:
+                                self.visualizer.save(
+                                    image=image_array,
+                                    tool_name=function_name,
+                                    args=arguments,
+                                    result=result,
+                                    call_index=call_counter,
+                                    iteration=iteration
+                                )
+                            
                             # Convert result to string to pass back to LLM
                             result_str = json.dumps(result, ensure_ascii=False)[:4000] # truncate if too long
                             if len(json.dumps(result)) > 4000:
                                 result_str += "... (truncated)"
                         except Exception as e:
                             result_str = f"Error executing tool {function_name}: {str(e)}"
+                            # Save error visualization
+                            if self.visualize and self.visualizer:
+                                self.visualizer.save(
+                                    image=image_array,
+                                    tool_name=function_name,
+                                    args=arguments,
+                                    result=result_str,
+                                    call_index=call_counter,
+                                    iteration=iteration,
+                                    is_error=True
+                                )
                     else:
                         result_str = f"Error: Tool {function_name} not found."
+                        if self.visualize and self.visualizer:
+                            self.visualizer.save(
+                                image=image_array,
+                                tool_name=function_name,
+                                args=arguments,
+                                result=result_str,
+                                call_index=call_counter,
+                                iteration=iteration,
+                                is_error=True
+                            )
                         
+                    call_counter += 1
+                    
                     # Append tool result to conversation
                     messages.append({
                         "role": "tool",
