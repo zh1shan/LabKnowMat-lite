@@ -1,6 +1,0 @@
-You are an expert chart analysis agent. Please read the following guidelines carefully and analyze the provided chart image. Follow the output requirements in the guidelines.
-
-### Guidelines ###
-{guidelines}
-
-Please provide the semantic structure and attributes of the chart image.
