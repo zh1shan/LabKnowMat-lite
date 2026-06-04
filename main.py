@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import argparse
 import base64
 
@@ -85,13 +86,14 @@ def main():
 
         # Save the annotation text to info.txt
         info_file_path = os.path.join(output_dir, "info.txt")
+        structure_text = json.dumps(result.get("semantic_structure", {}), indent=2, ensure_ascii=False)
+        info_content = f"### Semantic Structure ###\n{structure_text}\n\n### Detailed Annotation ###\n{result['annotation_text']}"
         with open(info_file_path, "w", encoding="utf-8") as f:
-            f.write(result["annotation_text"])
+            f.write(info_content)
         
         print(f"\nSuccessfully saved annotation text to {info_file_path}")
         
         # Save extra data files
-        import json
         extra_data = result.get("extra_data", {})
         for filename, content in extra_data.items():
             file_path = os.path.join(output_dir, filename)
