@@ -6,10 +6,6 @@ CRITICAL INSTRUCTIONS:
 3. You MUST include logic to save the figure to the current directory as 'chart.png'. For example: plt.savefig('chart.png', bbox_inches='tight'). Do not use plt.show().
 4. You MUST also export the underlying chart data to 'data.csv' in the current directory using Python's csv module or pandas. Choose a sensible column structure that best represents the data for the given chart type (e.g., x,y columns for scatter/line charts; category,value for bar charts; label,percentage for pie charts; row,col,value for heatmaps). Include a header row.
 5. Only output the Python code inside ```python ... ``` block. Do not output anything else outside of the thinking block and code block.
-6. **For pie charts**: You MUST reproduce the original chart's layout exactly:
-   - Set `startangle` in `plt.pie()` / `ax.pie()` to match the start angle specified in the description (measured counter-clockwise from 3 o'clock in degrees).
-   - Set `counterclock=True` if the description says the rotation direction is counter-clockwise, or `counterclock=False` if clockwise.
-   - Order the `sizes`, `labels`, and `colors` arrays in the exact slice sequence given in the description (starting from the start angle, following the rotation direction).
 {extra_instructions}
 Here is the chart description:
 ```text
