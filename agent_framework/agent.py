@@ -90,7 +90,7 @@ class LabKnowMatLiteAgent:
             }
         ]
         
-        max_iterations = 10
+        max_iterations = 20
         final_annotation_text = ""
         extra_data = {}
         call_counter = 0
