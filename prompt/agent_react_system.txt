@@ -6,6 +6,11 @@ You have access to several specialized atomic tools. You must invoke them to gat
 
 ### Instructions ###
 1. Analyze the semantic structure above.
-2. Decide which tools to call. You can make multiple tool calls in parallel if needed.
-3. After gathering all necessary coordinates and colors for every component, write a comprehensive final report describing the chart's components, axes mapping, and the pixel coordinates of the data points/bars/slices. This report should look like the 'annotate.txt' format.
-4. Do NOT guess coordinates. You must use tools to find them.
+2. **MANDATORY: Call `ocr_text_locator` FIRST** before any other tool. After receiving OCR results, identify which text items are **data labels** (e.g., numbers displayed directly on bars, next to line-chart inflection points, inside pie slices, etc.). These OCR-extracted numbers are ground-truth values and must be used as-is in your final report, marked with a `[OCR]` tag. Do NOT attempt to infer these values from pixel coordinates when an OCR data label is available. Only fall back to pixel-coordinate-based inference (marked with `[inferred]`) for data points that have no accompanying text label.
+3. Decide which additional tools to call to gather remaining coordinates, colors, and geometric information. You can make multiple tool calls in parallel if needed.
+4. **For pie charts specifically**, your final report MUST additionally include:
+   - **Start angle**: the angular position of the first slice's starting edge, measured in degrees counter-clockwise from the 3 o'clock position (e.g., 90 = 12 o'clock, 0 = 3 o'clock, 270 = 6 o'clock).
+   - **Rotation direction**: whether slices are arranged clockwise or counter-clockwise.
+   - **Slice order**: the exact sequence of slices as they appear in the rotation direction, starting from the start angle.
+5. After gathering all necessary information, write a comprehensive final report describing the chart's components, axes mapping, and the pixel coordinates of the data points/bars/slices. This report should look like the 'annotate.txt' format. In the data values section, clearly tag each value as `[OCR]` (directly extracted from chart text) or `[inferred]` (inferred from pixel coordinates and axis mapping).
+6. Do NOT guess coordinates. You must use tools to find them.
