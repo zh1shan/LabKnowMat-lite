@@ -10,7 +10,7 @@ class CodeGenerator:
     """
     def __init__(self, api_key: str = None, model: str = None):
         # By default use the Phase 3 model
-        model = model or os.environ.get("LLM_MODEL_PHASE_3", "google/gemini-3.1-pro-preview")
+        model = model or os.environ.get("LLM_MODEL_PHASE_3", "UNKNOWN")
         self.llm = KimiLLM(api_key=api_key, model=model)
 
     def generate_and_run_code(self, info_txt_path: str, output_dir: str) -> None:

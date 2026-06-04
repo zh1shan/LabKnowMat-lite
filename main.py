@@ -64,6 +64,11 @@ def main():
         
         from agent_framework.agent import LabKnowMatLiteAgent
 
+        llm_model = os.environ.get("LLM_MODEL", "UNKNOWN")
+        llm_model_phase3 = os.environ.get("LLM_MODEL_PHASE_3", "UNKNOWN")
+        print(f"[Config] LLM_MODEL (Phase 1 & 2): {llm_model}")
+        print(f"[Config] LLM_MODEL_PHASE_3: {llm_model_phase3}")
+
         print(f"Starting processing for image: {image_path}")
         print(f"Output will be saved to: {output_dir}")
 
