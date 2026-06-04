@@ -88,7 +88,6 @@ class ScatterPointExtractorV1(BaseAtomicTool):
             points_json.append({
                 "x": int(x),
                 "y": int(y),
-                "rgb": [int(v) for v in np.clip(np.round(rgb), 0, 255)],
                 "cluster_id": int(cluster_id),
             })
             

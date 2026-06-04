@@ -111,9 +111,13 @@ class ToolCallVisualizer:
         if tr and len(tr) == 4:
             cv2.rectangle(img, (tr[0], tr[1]), (tr[2], tr[3]),
                           (128, 128, 128), 2)
+        cluster_colors = {}
+        for cl in result.get("clusters", []):
+            cluster_colors[cl["id"]] = cl.get("mean_rgb", [255, 0, 0])
         for pt in result.get("points", []):
             x, y = int(pt["x"]), int(pt["y"])
-            rgb = pt.get("rgb", [255, 0, 0])
+            cid = pt.get("cluster_id", 0)
+            rgb = cluster_colors.get(cid, [255, 0, 0])
             color = tuple(rgb[::-1])
             cv2.circle(img, (x, y), 5, color, -1)
             cv2.circle(img, (x, y), 5, (255, 255, 255), 1)

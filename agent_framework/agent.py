@@ -138,8 +138,8 @@ class LabKnowMatLiteAgent:
                                 )
                             
                             # Convert result to string to pass back to LLM
-                            result_str = json.dumps(result, ensure_ascii=False)[:4000] # truncate if too long
-                            if len(json.dumps(result)) > 4000:
+                            result_str = json.dumps(result, ensure_ascii=False)[:15000]
+                            if len(json.dumps(result)) > 15000:
                                 result_str += "... (truncated)"
                         except Exception as e:
                             result_str = f"Error executing tool {function_name}: {str(e)}"
