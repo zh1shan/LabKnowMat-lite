@@ -134,22 +134,19 @@ class ToolCallVisualizer:
         if not isinstance(result, list):
             return
         for idx, sl in enumerate(result):
-            poly = sl.get("polygon", [])
             centroid = sl.get("centroid", [0, 0])
             hex_c = sl.get("color", "#ff0000")
+            pixel_count = sl.get("pixel_count", 0)
             try:
                 bgr = (int(hex_c[5:7], 16), int(hex_c[3:5], 16), int(hex_c[1:3], 16))
             except Exception:
                 bgr = (0, 0, 255)
-            if poly:
-                pts = np.array(poly, dtype=np.int32)
-                overlay = img.copy()
-                cv2.fillPoly(overlay, [pts], bgr)
-                cv2.addWeighted(overlay, 0.3, img, 0.7, 0, img)
-                cv2.polylines(img, [pts], True, bgr, 2)
             cx, cy = int(centroid[0]), int(centroid[1])
             cv2.drawMarker(img, (cx, cy), (255, 255, 255),
                            cv2.MARKER_CROSS, 12, 2)
+            label = f"{pixel_count}px"
+            cv2.putText(img, label, (cx + 8, cy + 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, bgr, 1)
 
     def _overlay_heatmap(self, img: np.ndarray, result: Any, args: dict):
         if not isinstance(result, dict):
@@ -264,7 +261,8 @@ class ToolCallVisualizer:
                     centroid = sl.get("centroid", [0, 0])
                     cx_str = f"{centroid[0]:.0f}"
                     cy_str = f"{centroid[1]:.0f}"
-                    summary.append(f"  Slice {i}: ({cx_str},{cy_str})")
+                    pc = sl.get("pixel_count", 0)
+                    summary.append(f"  Slice {i}: ({cx_str},{cy_str}) {pc}px")
                     hex_c = sl.get("color", "#000000")
                     try:
                         colors.append((int(hex_c[1:3], 16),

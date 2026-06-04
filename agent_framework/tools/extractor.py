@@ -204,12 +204,12 @@ class SAM3BoxExtractor(BaseAtomicTool):
 
 class PieSliceExtractor(BaseAtomicTool):
     """
-    Tool for extracting individual slices of a pie chart, capturing their centroid, color, and polygon outline.
+    Tool for extracting individual slices of a pie chart, capturing their centroid, color, and pixel count.
     """
     name = "pie_slice_extractor"
     description = (
         "Extracts pie chart slices. Identifies each slice's geometric centroid, primary color, "
-        "and polygon outline. Useful for matching labels to pie segments."
+        "and pixel count. Useful for matching labels to pie segments and calculating proportions."
     )
     
     def __init__(self):
@@ -255,7 +255,7 @@ class PieSliceExtractor(BaseAtomicTool):
             text_prompt (str): Text prompt guiding the segmentation (default: "pie chart slice").
             
         Returns:
-            List[Dict[str, Any]]: List of slices with centroid, color, and polygon coordinates.
+            List[Dict[str, Any]]: List of slices with centroid, color, and pixel count.
         """
         self._init_model()
         
@@ -336,6 +336,7 @@ class PieSliceExtractor(BaseAtomicTool):
                     
                 ys, xs = np.nonzero(slice_mask)
                 centroid = [float(np.mean(xs)), float(np.mean(ys))]
+                pixel_count = len(xs)
                 
                 # Extract main color
                 pixels = img_rgb[ys, xs]
@@ -343,24 +344,10 @@ class PieSliceExtractor(BaseAtomicTool):
                 median_color = np.median(pixels, axis=0).astype(int)
                 hex_color = f"#{median_color[0]:02x}{median_color[1]:02x}{median_color[2]:02x}"
                 
-                # Extract polygon
-                # cv2.findContours needs uint8 array
-                mask_u8 = (slice_mask.astype(np.uint8) * 255)
-                contours, _ = cv2.findContours(mask_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                
-                polygon = []
-                if contours:
-                    # Take the largest contour
-                    largest_contour = max(contours, key=cv2.contourArea)
-                    polygon = [[float(pt[0][0]), float(pt[0][1])] for pt in largest_contour]
-                
-                # If target color is provided, optionally filter (this is a simple approximation)
-                # For now, we return all slices and let the caller filter.
-                
                 results.append({
                     "centroid": centroid,
                     "color": hex_color,
-                    "polygon": polygon
+                    "pixel_count": pixel_count
                 })
                 
         return results
