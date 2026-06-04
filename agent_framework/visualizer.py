@@ -177,7 +177,8 @@ class ToolCallVisualizer:
             color = tuple(rgb[::-1])
             for pt in cl.get("sampled_points", []):
                 x, y = int(pt[0]), int(pt[1])
-                cv2.drawMarker(img, (x, y), color, cv2.MARKER_CROSS, 6, 1)
+                cv2.circle(img, (x, y), 5, color, -1)
+                cv2.circle(img, (x, y), 5, (255, 255, 255), 1)
 
     def _overlay_counter(self, img: np.ndarray, result: Any, args: dict):
         if not isinstance(result, dict):
@@ -243,10 +244,9 @@ class ToolCallVisualizer:
         for color_rgb in colors:
             if y > canvas.height - 20:
                 break
-            c_bgr = (color_rgb[2], color_rgb[1], color_rgb[0])
             hex_str = "#{:02X}{:02X}{:02X}".format(*color_rgb)
             draw.rectangle([x + 8, y, x + 22, y + 14],
-                           fill=tuple(c_bgr), outline=(255, 255, 255))
+                           fill=tuple(color_rgb), outline=(255, 255, 255))
             draw.text((x + 28, y), hex_str, fill=TEXT_COLOR, font=font_small)
             y += 20
 
