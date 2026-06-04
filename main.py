@@ -68,7 +68,9 @@ def main():
 
         # Encode image
         base64_image = encode_image(image_path)
-        image_url = f"data:image/jpeg;base64,{base64_image}"
+        ext = os.path.splitext(image_path)[1].lower().lstrip(".")
+        mime_type = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "gif": "image/gif", "webp": "image/webp"}.get(ext, "image/png")
+        image_url = f"data:{mime_type};base64,{base64_image}"
 
         # Initialize Agent
         agent = LabKnowMatLiteAgent(visualize=args.visualize, output_dir=output_dir)
