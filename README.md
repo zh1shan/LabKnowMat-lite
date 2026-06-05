@@ -62,13 +62,23 @@ pip install paddleocr
 
 #### 3.1 安装 PyTorch
 
-```bash
-# CUDA 12.1（推荐）
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+> **注意**：PyTorch 2.7.0 已弃用 CUDA 12.1，请使用以下受支持的 CUDA 版本。
 
-# 或 CPU 版本
+```bash
+# CUDA 12.8（推荐，需要较新的 NVIDIA 驱动）
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+
+# CUDA 12.6
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+
+# CUDA 11.8（适用于较老的 GPU）
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# 或 CPU 版本（无需 GPU）
 pip install torch torchvision torchaudio
 ```
+
+> 请根据你的 GPU 驱动和 CUDA 版本选择合适的命令。可通过 `nvidia-smi` 查看驱动支持的最高 CUDA 版本。
 
 #### 3.2 授权 Hugging Face
 

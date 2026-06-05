@@ -16,8 +16,14 @@ conda activate labknowmat-lite
 ### 1. 安装 PyTorch 及其生态
 推荐安装支持 CUDA 的版本（根据您的显卡情况调整）。如果仅使用 CPU，可以安装 cpu 版本。
 ```bash
-# 示例：安装 PyTorch (假设 CUDA 12.1)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# 示例：安装 PyTorch (CUDA 12.8)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+
+# 或 CUDA 11.8（较老 GPU）
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# 或 CPU 版本
+pip install torch torchvision torchaudio
 ```
 
 ### 2. 安装 SAM3 及其他依赖
