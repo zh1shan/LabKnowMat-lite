@@ -196,8 +196,10 @@ class ToolCallVisualizer:
         sp = args.get("seed_point")
         if sp and len(sp) == 2:
             sx, sy = int(sp[0]), int(sp[1])
-            cv2.drawMarker(img, (sx, sy), (0, 0, 255),
-                           cv2.MARKER_CROSS, 12, 2)
+            cv2.drawMarker(img, (sx, sy), (255, 255, 255),
+                           cv2.MARKER_CROSS, 24, 5)
+            cv2.drawMarker(img, (sx, sy), (0, 0, 0),
+                           cv2.MARKER_CROSS, 20, 2)
 
     def _draw_sidebar(self, canvas: Image.Image, tool_name: str,
                       args: dict, result: Any, call_index: int,
