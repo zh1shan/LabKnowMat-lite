@@ -93,12 +93,20 @@ hf auth login
 
 #### 3.3 克隆并安装 SAM3
 
+> **注意**：SAM3 强制要求 `numpy<2`，会与本项目所需的 `numpy>=2`（opencv-python 依赖）冲突。请使用 `--no-deps` 安装 SAM3，再手动安装其其余依赖。
+
 ```bash
 # 在项目根目录下执行
 git clone https://github.com/facebookresearch/sam3.git
 cd sam3
 git checkout 11dec2936de97f2857c1f76b66d982d5a001155d
-pip install -e .
+
+# 使用 --no-deps 避免 numpy 被降级
+pip install -e . --no-deps
+
+# 手动安装 SAM3 的其余依赖（跳过 numpy<2 约束）
+pip install timm ftfy==6.1.1 regex iopath
+
 cd ..
 ```
 
