@@ -49,7 +49,7 @@ class ColorClusterPointSampler(BaseAtomicTool):
         "Note: DO NOT use this for Scatter plots. If it is a Scatter plot, "
         "please prioritize using scatter_point_extractor_v1 instead. "
         "Returns the mean RGB color of each cluster and a list of evenly sampled (x,y) physical coordinates. "
-        "Recommendation: Set sample_size to be no less than 20."
+        "Recommendation: Set sample_size to be no less than 50."
     )
 
     def run(self, image: np.ndarray, num_colors: int, sample_size: int, core_ratio: float = 0.5, target_rect: List[int] = None) -> Dict[str, Any]:
