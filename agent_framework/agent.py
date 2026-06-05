@@ -12,6 +12,7 @@ from .tools.axis import AxisLineLocator
 from .tools.extractor import ScatterPointExtractorV1, SAM3BoxExtractor, PieSliceExtractor, HeatmapDigitizerTool
 from .tools.color_cluster_sampler import ColorClusterPointSampler
 from .tools.color_cluster_counter import ColorClusterPixelCounter
+from .tools.region_identifier import RegionIdentifier
 
 class LabKnowMatLiteAgent:
     """
@@ -46,7 +47,8 @@ class LabKnowMatLiteAgent:
             "pie_slice_extractor": PieSliceExtractor(),
             "heatmap_digitizer": HeatmapDigitizerTool(),
             "color_cluster_point_sampler": ColorClusterPointSampler(),
-            "color_cluster_pixel_counter": ColorClusterPixelCounter()
+            "color_cluster_pixel_counter": ColorClusterPixelCounter(),
+            "region_identifier": RegionIdentifier()
         }
 
     def process_chart(self, image_path: str, image_url_or_base64: str) -> Dict[str, Any]:

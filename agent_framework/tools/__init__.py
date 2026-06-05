@@ -4,6 +4,7 @@ from .axis import AxisTickMapper, AxisLineLocator
 from .extractor import ScatterPointExtractorV1, SAM3BoxExtractor, PieSliceExtractor, HeatmapDigitizerTool
 from .color_cluster_sampler import ColorClusterPointSampler
 from .color_cluster_counter import ColorClusterPixelCounter
+from .region_identifier import RegionIdentifier
 
 __all__ = [
     "BaseAtomicTool",
@@ -15,5 +16,6 @@ __all__ = [
     "PieSliceExtractor",
     "HeatmapDigitizerTool",
     "ColorClusterPointSampler",
-    "ColorClusterPixelCounter"
+    "ColorClusterPixelCounter",
+    "RegionIdentifier"
 ]

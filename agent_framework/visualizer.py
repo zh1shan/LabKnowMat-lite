@@ -70,6 +70,7 @@ class ToolCallVisualizer:
             "heatmap_digitizer": self._overlay_heatmap,
             "color_cluster_point_sampler": self._overlay_sampler,
             "color_cluster_pixel_counter": self._overlay_counter,
+            "region_identifier": self._overlay_region,
         }
         fn = dispatch.get(tool_name)
         if fn:
@@ -188,6 +189,15 @@ class ToolCallVisualizer:
         if tr and len(tr) == 4:
             cv2.rectangle(img, (tr[0], tr[1]), (tr[2], tr[3]),
                           (128, 128, 128), 2)
+
+    def _overlay_region(self, img: np.ndarray, result: Any, args: dict):
+        if not isinstance(result, dict):
+            return
+        sp = args.get("seed_point")
+        if sp and len(sp) == 2:
+            sx, sy = int(sp[0]), int(sp[1])
+            cv2.drawMarker(img, (sx, sy), (0, 0, 255),
+                           cv2.MARKER_CROSS, 12, 2)
 
     def _draw_sidebar(self, canvas: Image.Image, tool_name: str,
                       args: dict, result: Any, call_index: int,
@@ -320,6 +330,14 @@ class ToolCallVisualizer:
                         f"  C{cl['cluster_idx']}: {pc}px "
                         f"RGB{tuple(mc)}")
                     colors.append(tuple(mc))
+            elif tool_name == "region_identifier":
+                hex_c = result.get("color_hex", "")
+                pc = result.get("pixel_count", 0)
+                summary.append(f"Color: {hex_c}")
+                summary.append(f"Pixels: {pc}")
+                rgb = result.get("color_rgb")
+                if rgb and len(rgb) == 3:
+                    colors.append(tuple(rgb))
             else:
                 for k, v in result.items():
                     summary.append(f"{k}: {_truncate(str(v), 35)}")
