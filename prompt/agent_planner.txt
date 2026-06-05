@@ -3,4 +3,11 @@ You are an expert chart analysis agent. Please read the following guidelines car
 ### Guidelines ###
 {guidelines}
 
-Please output the semantic structure and attributes of the chart image. CRITICAL: You MUST output ONLY a valid JSON object. Do not include markdown code blocks, do not include conversational text. Only the JSON dictionary containing the 'chart_type' and 'components'.
+Please output a comprehensive semantic structure of the chart image. Your output MUST be as detailed as possible, including the following for EVERY component:
+
+1. **Visible Data Values**: If the chart displays numerical values (e.g., percentages, counts, dates, measurements) as text labels or annotations, you MUST extract and include them exactly as shown.
+2. **Colors**: For each data element (bar, slice, line, point, etc.), extract its color. Provide at least the color name (e.g., "blue", "red") and ideally the approximate hex code (e.g., "#636efa").
+3. **Spatial Order**: Describe the arrangement of elements (e.g., clockwise order for pie slices, left-to-right for bars, top-to-bottom for legend items).
+4. **Structure Hierarchy**: For complex charts (e.g., nested, multi-layer), clearly identify each layer/ring/group and its contents separately.
+
+CRITICAL: You MUST output ONLY a valid JSON object. Do not include markdown code blocks, do not include conversational text. Only the JSON dictionary containing 'chart_type' and 'components'.
