@@ -92,7 +92,13 @@ def main():
         # Save the annotation text to info.txt
         info_file_path = os.path.join(output_dir, "info.txt")
         structure_text = json.dumps(result.get("semantic_structure", {}), indent=2, ensure_ascii=False)
-        info_content = f"### Semantic Structure ###\n{structure_text}\n\n### Detailed Annotation ###\n{result['annotation_text']}"
+        
+        fallback_triggered = result.get("fallback_triggered", False)
+        if fallback_triggered:
+            info_content = f"[NOTE] VLM fallback triggered: Phase 2 did not complete within iteration limit. Chart reconstruction script was generated directly by the VLM.\n\n### Semantic Structure ###\n{structure_text}\n\n### Detailed Annotation ###\n{result['annotation_text']}"
+        else:
+            info_content = f"### Semantic Structure ###\n{structure_text}\n\n### Detailed Annotation ###\n{result['annotation_text']}"
+        
         with open(info_file_path, "w", encoding="utf-8") as f:
             f.write(info_content)
         
@@ -106,10 +112,11 @@ def main():
                 json.dump(content, f, ensure_ascii=False)
             print(f"Successfully saved extra data to {file_path}")
         
-        # Phase 3: Execute Chart Reconstruction
-        from agent_framework.generator import CodeGenerator
-        generator = CodeGenerator()
-        generator.generate_and_run_code(info_file_path, output_dir)
+        # Phase 3: Execute Chart Reconstruction (skip if VLM fallback already handled it)
+        if not fallback_triggered:
+            from agent_framework.generator import CodeGenerator
+            generator = CodeGenerator()
+            generator.generate_and_run_code(info_file_path, output_dir)
         
         print(f"Successfully saved execution log to {log_file_path}")
 

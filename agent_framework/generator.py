@@ -58,7 +58,14 @@ class CodeGenerator:
             
         print(f"[Phase 3] Generated script saved to {script_path}")
         print("[Phase 3] Executing the script...")
-        
+        self.run_existing_code(output_dir)
+
+    @staticmethod
+    def run_existing_code(output_dir: str) -> None:
+        """
+        Executes the render_chart.py script already saved in output_dir.
+        Raises RuntimeError if execution fails.
+        """
         try:
             result = subprocess.run(
                 ["python", "render_chart.py"],
@@ -67,16 +74,17 @@ class CodeGenerator:
                 text=True,
                 check=True
             )
-            print("[Phase 3] Script executed successfully.")
+            print(f"[Execution] Script executed successfully.")
             csv_path = os.path.join(output_dir, "data.csv")
             if os.path.exists(csv_path):
-                print(f"[Phase 3] Chart saved as chart.png, data exported to data.csv")
+                print(f"[Execution] Chart saved as chart.png, data exported to data.csv")
             else:
-                print(f"[Phase 3] Chart saved as chart.png (Warning: data.csv was not generated)")
+                print(f"[Execution] Chart saved as chart.png (Warning: data.csv was not generated)")
             if result.stdout:
                 print(f"Stdout:\n{result.stdout}")
         except subprocess.CalledProcessError as e:
-            print(f"[Phase 3 Error] Script execution failed with exit code {e.returncode}.")
+            print(f"[Execution Error] Script execution failed with exit code {e.returncode}.")
             print(f"Stdout:\n{e.stdout}")
             print(f"Stderr:\n{e.stderr}")
+            raise RuntimeError(f"render_chart.py execution failed with exit code {e.returncode}")
 

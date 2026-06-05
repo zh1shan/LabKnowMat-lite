@@ -1,0 +1,14 @@
+The iterative tool-calling loop has reached its maximum iteration limit. You must now stop calling tools and directly generate the chart reconstruction code.
+
+Based on the chart image and the semantic structure below, write a complete Python script using matplotlib to reconstruct the chart as accurately as possible.
+
+### Chart Semantic Structure ###
+{structure}
+
+### CRITICAL INSTRUCTIONS ###
+1. Observe the chart image carefully and use any coordinate or color information you have already gathered from previous tool calls.
+2. Think step-by-step (Chain of Thought) before writing the code. Consider axis mappings, data values, colors, labels, and legends.
+3. Ensure colors, labels, and legends match the original chart as closely as possible.
+4. You MUST save the figure to the current directory as 'chart.png' using: plt.savefig('chart.png', bbox_inches='tight'). Do NOT use plt.show().
+5. You MUST export the underlying chart data to 'data.csv' in the current directory. Choose column headers that best fit the chart type (e.g., x,y for scatter/line; category,value for bar; label,percentage for pie; row,col,value for heatmap). Include a header row.
+6. Output ONLY the Python code inside a ```python ... ``` block. Do not output anything else.

@@ -2,8 +2,10 @@ import numpy as np
 import cv2
 import json
 import os
+import re
 from typing import Dict, Any, List
 from .llm import KimiLLM
+from .generator import CodeGenerator
 from .planner import SemanticPlanner
 from .tools.ocr import OCRTextLocator
 from .tools.axis import AxisLineLocator
@@ -28,6 +30,7 @@ class LabKnowMatLiteAgent:
             pass
         
         self.visualize = visualize
+        self.output_dir = output_dir
         self.visualizer = None
         if self.visualize and output_dir:
             from .visualizer import ToolCallVisualizer
@@ -94,6 +97,7 @@ class LabKnowMatLiteAgent:
         final_annotation_text = ""
         extra_data = {}
         call_counter = 0
+        fallback_triggered = False
         
         for iteration in range(max_iterations):
             print(f"\n[Iteration {iteration+1}] LLM is thinking...")
@@ -105,6 +109,39 @@ class LabKnowMatLiteAgent:
             tool_calls = response_msg.get("tool_calls")
             
             if tool_calls:
+                if iteration == max_iterations - 1:
+                    print("\n[Fallback] Maximum iterations reached. VLM will now directly generate reconstruction code.")
+                    fallback_prompt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompt", "agent_fallback.txt")
+                    with open(fallback_prompt_path, "r", encoding="utf-8") as f:
+                        fallback_prompt_template = f.read()
+                    fallback_prompt = fallback_prompt_template.replace("{structure}", json.dumps(structure, ensure_ascii=False))
+                    
+                    messages.append({
+                        "role": "user",
+                        "content": fallback_prompt
+                    })
+                    
+                    print("[Fallback] VLM is generating Python code directly...")
+                    fallback_response = self.llm.chat(messages, temperature=0.2)
+                    fallback_content = fallback_response.get("content", "")
+                    
+                    match = re.search(r'```python\n(.*?)\n```', fallback_content, re.DOTALL)
+                    if not match:
+                        raise RuntimeError("[Fallback] VLM failed to produce Python code block in response.")
+                    
+                    code = match.group(1)
+                    script_path = os.path.join(self.output_dir, "render_chart.py")
+                    with open(script_path, "w", encoding="utf-8") as f:
+                        f.write(code)
+                    print(f"[Fallback] Generated script saved to {script_path}")
+                    print("[Fallback] Executing the script...")
+                    CodeGenerator.run_existing_code(self.output_dir)
+                    
+                    fallback_triggered = True
+                    final_annotation_text = ""
+                    print("[Fallback] Completed successfully.")
+                    break
+                
                 print(f"LLM decided to call {len(tool_calls)} tool(s).")
                 for tool_call in tool_calls:
                     function_name = tool_call["function"]["name"]
@@ -185,5 +222,6 @@ class LabKnowMatLiteAgent:
         return {
             "semantic_structure": structure,
             "annotation_text": final_annotation_text,
-            "extra_data": extra_data
+            "extra_data": extra_data,
+            "fallback_triggered": fallback_triggered
         }
