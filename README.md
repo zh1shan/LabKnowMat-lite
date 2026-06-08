@@ -62,7 +62,7 @@ cp .env.example .env
 2. 在已激活的 conda 环境中登录 Hugging Face：
 
 ```bash
-huggingface-cli login
+hf auth login
 # 粘贴你的 Access Token
 ```
 
