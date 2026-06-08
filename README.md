@@ -106,6 +106,8 @@ pip install -e .
 cd ..
 ```
 
+> **关于依赖冲突 WARNING**：安装过程中 pip 可能会提示 `opencv-python requires numpy>=2, but you have numpy 1.26.4` 之类的依赖冲突。这是正常现象，不影响项目运行，可安全忽略。
+
 > 首次运行 SAM3 相关工具时会自动下载模型权重到 `~/.cache/huggingface/`。
 
 ---
