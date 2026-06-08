@@ -39,7 +39,7 @@
 
 ### 2.5 SAM3 图形提取工具组 (`SAM3BoxExtractor`, `PieSliceExtractor`)
 - **功能**：包装了 Facebook 的 Segment Anything Model 3。可以通过文本提示（Text Prompt）来做 Zero-Shot 的遮罩提取，例如提取柱体（bar）或饼图扇形（pie slice）。其中 `PieSliceExtractor` 包含了复杂的颜色拉伸后处理与极坐标边界平滑算法（迁移自参考代码的 `pie_utils.py`）。
-- **注意**：需要在运行环境中单独通过 pip 源码安装 SAM3 仓库（详见 `SAM3_Setup.md`）。
+- **注意**：需要在运行环境中单独通过 pip 源码安装 SAM3 仓库（详见 `README.md`）。
 
 ---
 
