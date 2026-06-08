@@ -82,7 +82,11 @@ pip install torch torchvision torchaudio
 
 #### 3.2 授权 Hugging Face
 
-SAM3 模型权重托管在 Hugging Face，需要先登录才能自动下载。`huggingface-hub` 通常已随 PyTorch 自动安装，也可手动安装或更新：
+SAM3 模型权重托管在 Hugging Face，需要**申请使用权限**并登录后才能自动下载。
+
+**申请使用 SAM3 模型**：访问 https://huggingface.co/facebook/sam3 ，填写使用协议并提交申请。
+
+`huggingface-hub` 通常已随 PyTorch 自动安装，也可手动安装或更新：
 
 ```bash
 pip install huggingface-hub
