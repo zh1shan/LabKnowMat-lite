@@ -1,0 +1,12 @@
+name: labknowmat-lite
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy=1.26.4
+  - mkl
+  - mkl-service
+  - mkl_fft
+  - mkl_random
+  - pip:
+    - -r requirements-locked.txt
