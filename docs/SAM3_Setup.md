@@ -29,8 +29,6 @@ pip install torch torchvision torchaudio
 ### 2. 安装 SAM3 及其他依赖
 你需要将 SAM3 安装到环境中。在 `LabKnowMat-lite` 项目根目录下运行：
 
-> **重要**：SAM3 的 `pyproject.toml` 强制要求 `numpy<2`，会与本项目所需的 `numpy>=2`（opencv-python 依赖）冲突。请使用 `--no-deps` 安装，再手动安装其余依赖。
-
 ```bash
 # 下载 SAM3 源码
 git clone https://github.com/facebookresearch/sam3.git
@@ -39,17 +37,14 @@ git clone https://github.com/facebookresearch/sam3.git
 cd sam3
 git checkout 11dec2936de97f2857c1f76b66d982d5a001155d
 
-# 使用 --no-deps 安装，避免 numpy 被降级到 1.x
-pip install -e . --no-deps
-
-# 手动安装 SAM3 的其余依赖（跳过 numpy<2 约束）
-pip install timm ftfy==6.1.1 regex iopath
+# 安装 SAM3
+pip install -e .
 
 # 退回项目根目录
 cd ..
 ```
 
-*注意：`sam3` 还依赖 `huggingface-hub`，但通常已随 PyTorch 自动安装。*
+*注意：`sam3` 的安装脚本可能会自动拉取一些额外的依赖如 `timm`, `huggingface-hub`, `pillow` 等。*
 
 ### 3. 模型权重说明
 你不需要手动去下载几个 GB 的权重文件。
