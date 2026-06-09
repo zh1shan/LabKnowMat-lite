@@ -54,7 +54,7 @@ class ToolCallVisualizer:
         canvas.paste(main_img, (SIDEBAR_WIDTH, 0))
 
         self._draw_sidebar(canvas, tool_name, args, result,
-                           call_index, iteration, is_error)
+                           call_index, iteration, is_error, extra)
 
         filename = f"{call_index:02d}.png"
         canvas.save(os.path.join(self.output_dir, filename))
@@ -212,7 +212,8 @@ class ToolCallVisualizer:
 
     def _draw_sidebar(self, canvas: Image.Image, tool_name: str,
                       args: dict, result: Any, call_index: int,
-                      iteration: int, is_error: bool):
+                      iteration: int, is_error: bool,
+                      extra: Optional[dict] = None):
         draw = ImageDraw.Draw(canvas)
         font_title = _get_font(18, bold=True)
         font_body = _get_font(13)
@@ -254,7 +255,7 @@ class ToolCallVisualizer:
                       fill=RED_COLOR, font=font_small)
             return
 
-        summary, colors = self._get_summary(result, tool_name)
+        summary, colors = self._get_summary(result, tool_name, extra)
         for line in summary:
             if y > canvas.height - 20:
                 break
@@ -272,7 +273,8 @@ class ToolCallVisualizer:
             draw.text((x + 28, y), hex_str, fill=TEXT_COLOR, font=font_small)
             y += 20
 
-    def _get_summary(self, result: Any, tool_name: str):
+    def _get_summary(self, result: Any, tool_name: str,
+                      extra: Optional[dict] = None):
         summary = []
         colors = []
 
@@ -352,5 +354,10 @@ class ToolCallVisualizer:
             else:
                 for k, v in result.items():
                     summary.append(f"{k}: {_truncate(str(v), 35)}")
+
+        if extra and "excluded_text_boxes" in extra and extra["excluded_text_boxes"]:
+            summary.append("")
+            summary.append("Red boxes = OCR text regions excluded")
+            summary.append("from point/cluster detection")
 
         return summary, colors
