@@ -2,8 +2,10 @@ import os
 import sys
 import argparse
 import subprocess
+import time
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+RETRY_BASE_DELAY = 10
 
 
 def main():
@@ -11,6 +13,8 @@ def main():
     parser.add_argument("-i", "--input", required=True, help="Path to the folder containing chart images")
     parser.add_argument("-v", "--visualize", action="store_true",
                         help="Enable tool call visualization for each chart")
+    parser.add_argument("--retry", type=int, default=3,
+                        help="Number of retries for failed images (default: 3)")
     args = parser.parse_args()
 
     input_folder = os.path.abspath(args.input)
@@ -50,15 +54,29 @@ def main():
         if args.visualize:
             cmd.append("-v")
 
-        result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+        succeeded = False
+        for attempt in range(1 + args.retry):
+            if attempt > 0:
+                delay = RETRY_BASE_DELAY * (2 ** (attempt - 1))
+                print(f"  [Retry {attempt}/{args.retry}] Waiting {delay}s before retry...")
+                time.sleep(delay)
 
-        if result.returncode == 0:
-            print(f"  [OK] Output saved to: {output_dir}")
-            success += 1
-        else:
-            print(f"  [FAILED] Return code: {result.returncode}")
-            if result.stderr:
-                print(f"  Error: {result.stderr.strip()[-500:]}")
+            result = subprocess.run(
+                cmd, capture_output=True, text=True,
+                encoding="utf-8", errors="replace"
+            )
+
+            if result.returncode == 0:
+                print(f"  [OK] Output saved to: {output_dir}")
+                success += 1
+                succeeded = True
+                break
+            else:
+                print(f"  [FAILED] Return code: {result.returncode}")
+                if result.stderr:
+                    print(f"  Error: {result.stderr.strip()[-500:]}")
+
+        if not succeeded:
             failed.append(image_path)
 
     print("\n" + "=" * 60)
