@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 import random
 from typing import Dict, Any, List
 from .base import BaseAtomicTool
@@ -52,7 +53,7 @@ class ColorClusterPointSampler(BaseAtomicTool):
         "Recommendation: Set sample_size to be no less than 50."
     )
 
-    def run(self, image: np.ndarray, num_colors: int, sample_size: int, core_ratio: float = 0.5, target_rect: List[int] = None) -> Dict[str, Any]:
+    def run(self, image: np.ndarray, num_colors: int, sample_size: int, core_ratio: float = 0.5, target_rect: List[int] = None, exclude_text: bool = True) -> Dict[str, Any]:
         """
         Execute the tool's core function.
 
@@ -62,10 +63,26 @@ class ColorClusterPointSampler(BaseAtomicTool):
             sample_size (int): Number of points to evenly sample from the core pixels (n). Recommended >= 20.
             core_ratio (float): Ratio of core pixels to extract. Defaults to 0.5.
             target_rect (List[int]): Optional [x_min, y_min, x_max, y_max].
+            exclude_text (bool): Whether to run OCR and exclude text regions. Defaults to True.
 
         Returns:
             Dict[str, Any]: A flat JSON-compatible dictionary containing the extraction results.
         """
+        text_mask = None
+        ocr_boxes = []
+        if exclude_text:
+            from .ocr import OCRTextLocator
+            from .scatter_utils import build_text_mask_from_ocr
+            ocr_tool = OCRTextLocator()
+            ocr_results = ocr_tool.run(image)
+            text_mask = build_text_mask_from_ocr(image.shape, ocr_results, expand=2)
+            for item in ocr_results:
+                box = item.get("box")
+                if box:
+                    pts = np.array(box, dtype=np.int32)
+                    bx, by, bw, bh = cv2.boundingRect(pts)
+                    ocr_boxes.append([int(bx), int(by), int(bx + bw), int(by + bh)])
+        
         # Ensure image is in RGB since extract_colors_density expects RGB
         # LabKnowMat-lite images might be BGR if directly from cv2, or RGB if preprocessed.
         # Check standard convention in other tools. Usually BaseAtomicTool receives cv2 BGR image.
@@ -80,7 +97,8 @@ class ColorClusterPointSampler(BaseAtomicTool):
             image_rgb=image_rgb,
             n_colors=num_colors,
             core_ratio=core_ratio,
-            target_rect=target_rect
+            target_rect=target_rect,
+            text_mask=text_mask
         )
         
         output = []
@@ -101,7 +119,10 @@ class ColorClusterPointSampler(BaseAtomicTool):
                 "sampled_points": sampled_coords
             })
             
-        return {"clusters": output}
+        result = {"clusters": output}
+        if exclude_text:
+            result["excluded_text_boxes"] = ocr_boxes
+        return result
 
     def get_parameters_schema(self) -> Dict[str, Any]:
         return {
@@ -124,6 +145,11 @@ class ColorClusterPointSampler(BaseAtomicTool):
                     "type": "array",
                     "items": {"type": "integer"},
                     "description": "Optional bounding box [x_min, y_min, x_max, y_max] to restrict the processing area."
+                },
+                "exclude_text": {
+                    "type": "boolean",
+                    "description": "Whether to run OCR and exclude text regions to prevent sampling on text. Default is true.",
+                    "default": True
                 }
             },
             "required": ["num_colors", "sample_size"]

@@ -174,6 +174,10 @@ class ToolCallVisualizer:
         if tr and len(tr) == 4:
             cv2.rectangle(img, (tr[0], tr[1]), (tr[2], tr[3]),
                           (128, 128, 128), 2)
+        excluded_boxes = result.get("excluded_text_boxes", [])
+        for box in excluded_boxes:
+            if len(box) == 4:
+                cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0, 0, 255), 2)
         for cl in result.get("clusters", []):
             rgb = cl.get("mean_color", [255, 0, 0])
             color = tuple(rgb[::-1])

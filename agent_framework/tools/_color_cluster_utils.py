@@ -3,7 +3,7 @@ import cv2
 from skimage import color
 from sklearn.cluster import KMeans
 
-def extract_colors_density(image_rgb, n_colors, core_ratio=0.5, s_thresh=0.15, v_thresh=0.15, target_rect=None):
+def extract_colors_density(image_rgb, n_colors, core_ratio=0.5, s_thresh=0.15, v_thresh=0.15, target_rect=None, text_mask=None):
     """
     Extract core colors and their physical coordinates using a density histogram method.
     
@@ -39,6 +39,11 @@ def extract_colors_density(image_rgb, n_colors, core_ratio=0.5, s_thresh=0.15, v
     S = img_hsv[:, :, 1]
     V = img_hsv[:, :, 2]
     valid_mask = (S > s_thresh) & (V > v_thresh)
+    
+    if text_mask is not None:
+        h_w, w_w = working_img.shape[:2]
+        cropped = text_mask[offset_y:offset_y + h_w, offset_x:offset_x + w_w]
+        valid_mask = valid_mask & (cropped == 0)
     
     # Get y, x coordinates of valid pixels within the working_img
     y_idx, x_idx = np.where(valid_mask)
