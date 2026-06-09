@@ -134,7 +134,7 @@ class ColorClusterPointSampler(BaseAtomicTool):
                 },
                 "sample_size": {
                     "type": "integer",
-                    "description": "The number of points to evenly sample from the core pixels for each color (n). Decide based on chart complexity, but it is recommended to be no less than 20 to ensure sufficient trend capture."
+                    "description": "The number of points to evenly sample from the core pixels for each color (n). Decide based on chart complexity, but it is recommended to be no less than 50 to ensure sufficient trend capture."
                 },
                 "core_ratio": {
                     "type": "number",
