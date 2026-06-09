@@ -67,6 +67,14 @@ class ScatterPointExtractorV1(BaseAtomicTool):
         ocr_results = ocr_tool.run(image)
         text_mask = build_text_mask_from_ocr(image.shape, ocr_results, ocr_expand)
         
+        ocr_boxes = []
+        for item in ocr_results:
+            box = item.get("box")
+            if box:
+                pts = np.array(box, dtype=np.int32)
+                bx, by, bw, bh = cv2.boundingRect(pts)
+                ocr_boxes.append([int(bx), int(by), int(bx + bw), int(by + bh)])
+        
         # 2. Detect points using template matching
         points = detect_points_template(
             image_bgr=image,
@@ -105,7 +113,8 @@ class ScatterPointExtractorV1(BaseAtomicTool):
             "point_count": len(points_json),
             "cluster_count": len(clusters_json),
             "points": points_json,
-            "clusters": clusters_json
+            "clusters": clusters_json,
+            "excluded_text_boxes": ocr_boxes
         }
 
 class SAM3BoxExtractor(BaseAtomicTool):
