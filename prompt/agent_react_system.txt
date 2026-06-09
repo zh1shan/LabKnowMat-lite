@@ -7,9 +7,9 @@ You have access to several specialized atomic tools. You must invoke them to gat
 ### Tool Usage Strategy ###
 1. **Be persistent**: If a tool returns unsatisfactory results, DO NOT immediately abandon it. Try adjusting its parameters (e.g., tolerance, threshold, target_rect, match_threshold) and retry.
 2. **Handle nested structures separately**: For multi-layer charts (e.g., nested pie/donut charts), process each layer independently. Use different tools or seed points for each layer.
-3. **Verify with multiple tools**: Use `region_identifier` to verify colors found by other tools. Use `color_cluster_pixel_counter` to validate color proportions.
-4. **Extract legend colors**: Use `region_identifier` with seed points on legend color swatches to get precise hex colors for each legend entry.
-5. **Do not over-rely on a single tool**: If one tool fails or gives incomplete results, try alternative approaches (e.g., if `pie_slice_extractor` fails for inner rings, use `region_identifier` or `color_cluster_pixel_counter` instead).
+3. **Cross-validate with appropriate tools**: Use `color_cluster_pixel_counter` to validate color proportions. Use `color_cluster_point_sampler` to sample colors from specific regions.
+4. **Extract legend colors**: Refer to the approximate hex colors provided in the semantic structure. If higher precision is needed, use `color_cluster_point_sampler` with a `target_rect` covering the legend area.
+5. **Do not over-rely on a single tool**: If one tool fails or gives incomplete results, try alternative approaches. `region_identifier` is a last-resort tool — only use it for non-standard chart elements (e.g., stacked bar chart segments, inner rings of nested/donut pie charts) that no other tool can handle. Do NOT use it on standard bars, pie slices, scatter points, lines, heatmaps, or legend swatches.
 
 ### Output Format ###
 When you have gathered ALL necessary information, write a comprehensive final report in Markdown format. Your report MUST include:

@@ -6,9 +6,21 @@ from .base import BaseAtomicTool
 class RegionIdentifier(BaseAtomicTool):
     name = "region_identifier"
     description = (
-        "Identifies the connected color region containing a given seed point using flood fill in Lab color space. "
-        "Returns the seed point's color (hex and RGB) and the region's pixel count. "
-        "Useful for determining the area of a specific colored block in a chart."
+        "LAST-RESORT fallback tool for extracting the area and color of irregular, non-standard chart regions "
+        "that CANNOT be processed by any other available tool. "
+        "Uses flood fill from a seed point in Lab color space to identify a connected region, "
+        "returning the region's color (hex and RGB) and pixel count. "
+        "RESTRICTIONS — Do NOT use this tool on the following standard chart elements: "
+        "bar chart bars (use sam3_box_extractor), "
+        "regular circular pie chart slices (use pie_slice_extractor), "
+        "scatter plot points (use scatter_point_extractor_v1), "
+        "line chart data series (use color_cluster_point_sampler), "
+        "heatmaps (use heatmap_digitizer), "
+        "legend color swatches (refer to the semantic structure colors or use color_cluster_point_sampler). "
+        "ONLY use this tool when no other tool can handle the chart element, such as: "
+        "stacked bar chart segments (where individual segment areas need to be measured), "
+        "inner rings of donut or nested pie charts, irregular stacked area charts, "
+        "or other non-standard geometric shapes that specialized tools cannot segment."
     )
 
     def get_parameters_schema(self) -> Dict[str, Any]:
