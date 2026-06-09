@@ -164,6 +164,10 @@ class LabKnowMatLiteAgent:
                             if isinstance(result, dict) and "normalized_matrix" in result:
                                 extra_data["heatmap_data.json"] = result.pop("normalized_matrix")
                                 result["normalized_matrix_info"] = "Data is too large. It has been extracted and will be saved as 'heatmap_data.json'. Please instruct the reconstruction script to load this file."
+                            
+                            vis_extra = None
+                            if isinstance(result, dict) and "excluded_text_boxes" in result:
+                                vis_extra = {"excluded_text_boxes": result.pop("excluded_text_boxes")}
                                 
                             # Save tool call visualization
                             if self.visualize and self.visualizer:
@@ -173,7 +177,8 @@ class LabKnowMatLiteAgent:
                                     args=arguments,
                                     result=result,
                                     call_index=call_counter,
-                                    iteration=iteration
+                                    iteration=iteration,
+                                    extra=vis_extra
                                 )
                             
                             # Convert result to string to pass back to LLM

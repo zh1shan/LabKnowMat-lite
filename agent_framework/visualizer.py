@@ -36,7 +36,8 @@ class ToolCallVisualizer:
 
     def save(self, image: np.ndarray, tool_name: str, args: dict,
              result: Any, call_index: Optional[int] = None,
-             iteration: int = 0, is_error: bool = False) -> int:
+             iteration: int = 0, is_error: bool = False,
+             extra: Optional[dict] = None) -> int:
         if call_index is None:
             call_index = self._call_counter
             self._call_counter += 1
@@ -46,7 +47,7 @@ class ToolCallVisualizer:
         img_bgr = image.copy()
 
         if not is_error:
-            self._draw_overlay(img_bgr, tool_name, result, args)
+            self._draw_overlay(img_bgr, tool_name, result, args, extra)
 
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         main_img = Image.fromarray(img_rgb)
@@ -60,7 +61,7 @@ class ToolCallVisualizer:
         return call_index
 
     def _draw_overlay(self, img: np.ndarray, tool_name: str,
-                      result: Any, args: dict):
+                      result: Any, args: dict, extra: Optional[dict] = None):
         dispatch = {
             "ocr_text_locator": self._overlay_ocr,
             "axis_line_locator": self._overlay_axis,
@@ -74,9 +75,9 @@ class ToolCallVisualizer:
         }
         fn = dispatch.get(tool_name)
         if fn:
-            fn(img, result, args)
+            fn(img, result, args, extra)
 
-    def _overlay_ocr(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_ocr(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, list):
             return
         for item in result:
@@ -91,7 +92,7 @@ class ToolCallVisualizer:
                 cv2.putText(img, text, (cx + 5, cy - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
 
-    def _overlay_axis(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_axis(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, list):
             return
         for item in result:
@@ -105,7 +106,7 @@ class ToolCallVisualizer:
             cv2.putText(img, label, (p1[0] + 5, p1[1] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
-    def _overlay_scatter(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_scatter(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, dict):
             return
         tr = args.get("target_rect")
@@ -123,7 +124,7 @@ class ToolCallVisualizer:
             cv2.circle(img, (x, y), 5, color, -1)
             cv2.circle(img, (x, y), 5, (255, 255, 255), 1)
 
-    def _overlay_sam3(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_sam3(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, list):
             return
         for idx, box in enumerate(result):
@@ -135,7 +136,7 @@ class ToolCallVisualizer:
             cv2.putText(img, str(idx), (x1 + 3, y1 + 20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, c, 2)
 
-    def _overlay_pie(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_pie(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, list):
             return
         for idx, sl in enumerate(result):
@@ -153,7 +154,7 @@ class ToolCallVisualizer:
             cv2.putText(img, label, (cx + 8, cy + 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, bgr, 1)
 
-    def _overlay_heatmap(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_heatmap(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, dict):
             return
         hr = result.get("heatmap_rect")
@@ -167,17 +168,17 @@ class ToolCallVisualizer:
             cv2.putText(img, "Legend", (lr[0] + 3, lr[1] + 20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 100, 0), 1)
 
-    def _overlay_sampler(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_sampler(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, dict):
             return
         tr = args.get("target_rect")
         if tr and len(tr) == 4:
             cv2.rectangle(img, (tr[0], tr[1]), (tr[2], tr[3]),
                           (128, 128, 128), 2)
-        excluded_boxes = result.get("excluded_text_boxes", [])
-        for box in excluded_boxes:
-            if len(box) == 4:
-                cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0, 0, 255), 2)
+        if extra and "excluded_text_boxes" in extra:
+            for box in extra["excluded_text_boxes"]:
+                if len(box) == 4:
+                    cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0, 0, 255), 2)
         for cl in result.get("clusters", []):
             rgb = cl.get("mean_color", [255, 0, 0])
             color = tuple(rgb[::-1])
@@ -186,7 +187,7 @@ class ToolCallVisualizer:
                 cv2.circle(img, (x, y), 5, color, -1)
                 cv2.circle(img, (x, y), 5, (255, 255, 255), 1)
 
-    def _overlay_counter(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_counter(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, dict):
             return
         tr = args.get("target_rect")
@@ -194,7 +195,7 @@ class ToolCallVisualizer:
             cv2.rectangle(img, (tr[0], tr[1]), (tr[2], tr[3]),
                           (128, 128, 128), 2)
 
-    def _overlay_region(self, img: np.ndarray, result: Any, args: dict):
+    def _overlay_region(self, img: np.ndarray, result: Any, args: dict, extra: Optional[dict] = None):
         if not isinstance(result, dict):
             return
         sp = args.get("seed_point")
