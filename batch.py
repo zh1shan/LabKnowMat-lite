@@ -13,7 +13,7 @@ def main():
     parser.add_argument("-i", "--input", required=True, help="Path to the folder containing chart images")
     parser.add_argument("-v", "--visualize", action="store_true",
                         help="Enable tool call visualization for each chart")
-    parser.add_argument("--retry", type=int, default=3,
+    parser.add_argument("-r", "--retry", type=int, default=3,
                         help="Number of retries for failed images (default: 3)")
     args = parser.parse_args()
 
