@@ -275,7 +275,12 @@ def kmeans(
 
     closest_d2 = np.sum((data - centers[0]) ** 2, axis=1)
     for i in range(1, k):
-        probs = closest_d2 / max(closest_d2.sum(), 1e-12)
+        total_d2 = float(closest_d2.sum())
+        if total_d2 <= 1e-12:
+            probs = np.full(n, 1.0 / n, dtype=np.float64)
+        else:
+            probs = (closest_d2 / total_d2).astype(np.float64)
+            probs /= probs.sum()
         idx = int(rng.choice(n, p=probs))
         centers[i] = data[idx]
         d2 = np.sum((data - centers[i]) ** 2, axis=1)
