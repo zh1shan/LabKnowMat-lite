@@ -3,7 +3,7 @@ import cv2
 from skimage import color
 from sklearn.cluster import KMeans
 
-def extract_colors_density(image_rgb, n_colors, core_ratio=0.5, s_thresh=0.15, v_thresh=0.15, target_rect=None, text_mask=None):
+def extract_colors_density(image_rgb, n_colors, core_ratio=0.5, s_thresh=0.15, v_thresh=0.15, target_rect=None, text_mask=None, lower_threshold=False):
     """
     Extract core colors and their physical coordinates using a density histogram method.
     
@@ -14,6 +14,8 @@ def extract_colors_density(image_rgb, n_colors, core_ratio=0.5, s_thresh=0.15, v
     - s_thresh: Saturation threshold to filter out grays
     - v_thresh: Value threshold to filter out blacks
     - target_rect: Optional [x_min, y_min, x_max, y_max] to crop the working area
+    - text_mask: Optional mask of text regions to exclude
+    - lower_threshold: Whether to lower saturation thresholds to detect black/dark gray lines while avoiding white background.
     
     Returns:
     - results: List of dictionaries containing cluster info, including mean RGB of core pixels and their (x, y) coordinates.
@@ -34,11 +36,19 @@ def extract_colors_density(image_rgb, n_colors, core_ratio=0.5, s_thresh=0.15, v
     if working_img.size == 0:
         return []
         
-    # 2. Filter out black, white, gray (in HSV space)
+    # 2. Filter out background in HSV space
     img_hsv = color.rgb2hsv(working_img)
     S = img_hsv[:, :, 1]
     V = img_hsv[:, :, 2]
-    valid_mask = (S > s_thresh) & (V > v_thresh)
+    if lower_threshold:
+        # In low-saturation charts, light colors are background and dark colors are content.
+        # Accept colored pixels OR low-saturation dark/medium gray and black pixels, excluding white/light background.
+        color_pixels = (S >= s_thresh) & (V > v_thresh)
+        gray_content_pixels = (S < s_thresh) & (V > 0.05) & (V <= 0.80)
+        valid_mask = color_pixels | gray_content_pixels
+    else:
+        # Default strategy: filter out black, white, gray
+        valid_mask = (S > s_thresh) & (V > v_thresh)
     
     if text_mask is not None:
         h_w, w_w = working_img.shape[:2]

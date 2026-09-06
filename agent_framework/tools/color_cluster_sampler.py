@@ -50,10 +50,13 @@ class ColorClusterPointSampler(BaseAtomicTool):
         "Note: DO NOT use this for Scatter plots. If it is a Scatter plot, "
         "please prioritize using scatter_point_extractor_v1 instead. "
         "Returns the mean RGB color of each cluster and a list of evenly sampled (x,y) physical coordinates. "
-        "Recommendation: Set sample_size to be no less than 50."
+        "Recommendation: Set sample_size to be no less than 50. "
+        "Optional parameter 'lower_threshold': It is strongly NOT recommended to use 'lower_threshold' unless "
+        "you have already called color_cluster_point_sampler with default parameters and failed to identify/detect targets "
+        "(e.g., returned 0 clusters for dark gray or black lines)."
     )
 
-    def run(self, image: np.ndarray, num_colors: int, sample_size: int, core_ratio: float = 0.5, target_rect: List[int] = None, exclude_text: bool = True) -> Dict[str, Any]:
+    def run(self, image: np.ndarray, num_colors: int, sample_size: int, core_ratio: float = 0.5, target_rect: List[int] = None, exclude_text: bool = True, lower_threshold: bool = False, **kwargs) -> Dict[str, Any]:
         """
         Execute the tool's core function.
 
@@ -64,10 +67,12 @@ class ColorClusterPointSampler(BaseAtomicTool):
             core_ratio (float): Ratio of core pixels to extract. Defaults to 0.5.
             target_rect (List[int]): Optional [x_min, y_min, x_max, y_max].
             exclude_text (bool): Whether to run OCR and exclude text regions. Defaults to True.
+            lower_threshold (bool): Whether to lower saturation thresholds to detect black/dark gray lines. Defaults to False.
 
         Returns:
             Dict[str, Any]: A flat JSON-compatible dictionary containing the extraction results.
         """
+        lower_threshold = lower_threshold or kwargs.get("lower_threshold", False)
         text_mask = None
         ocr_boxes = []
         if exclude_text:
@@ -98,7 +103,8 @@ class ColorClusterPointSampler(BaseAtomicTool):
             n_colors=num_colors,
             core_ratio=core_ratio,
             target_rect=target_rect,
-            text_mask=text_mask
+            text_mask=text_mask,
+            lower_threshold=lower_threshold
         )
         
         output = []
@@ -150,6 +156,11 @@ class ColorClusterPointSampler(BaseAtomicTool):
                     "type": "boolean",
                     "description": "Whether to run OCR and exclude text regions to prevent sampling on text. Default is true.",
                     "default": True
+                },
+                "lower_threshold": {
+                    "type": "boolean",
+                    "description": "Optional flag to lower saturation thresholds to detect black or dark gray lines/points. NOT recommended to use this unless you have already called color_cluster_point_sampler with default parameters and failed to detect targets (0 clusters found). Default is false.",
+                    "default": False
                 }
             },
             "required": ["num_colors", "sample_size"]

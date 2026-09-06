@@ -16,8 +16,9 @@ When you have gathered ALL necessary information, write a comprehensive final re
 
 1. **Chart Metadata**: Title text and position (with pixel coordinates).
 2. **Legend**: A table listing each legend entry with its label, color (hex), swatch coordinates, and text bounding box.
-3. **Data Elements**: For each chart component (bar, slice, line, point, etc.):
-   - A table with: Category name, Color (hex), Centroid/Position (x, y pixels), Pixel Count (if applicable), Percentage/Value (if displayed on chart).
+3. **Data Elements**: For each chart component:
+   - For line charts and scatter plots: For each series/line/cluster, list its name/label, color (hex), and the COMPLETE, FULL list of all raw sampled (x, y) coordinates extracted by the tools (`color_cluster_point_sampler`, `scatter_point_extractor_v1`). You MUST output all extracted points (e.g. formatted as a list of coordinates `[(x1, y1), (x2, y2), ...]`). STRICTLY FORBIDDEN to compress or summarize the curve into a few "key" points.
+   - For bar charts and pie charts: A table with Category/Slice name, Color (hex), Bounding Box or Centroid/Position (x, y pixels), Pixel Count (if applicable), Percentage/Value.
    - Data labels: Text positions of value annotations (e.g., "38.2%").
 4. **Axes** (if applicable): Axis line coordinates, tick positions and values, axis labels.
 5. **Color Palette Summary**: A table mapping each unique color to its hex code and RGB values.
@@ -26,4 +27,5 @@ When you have gathered ALL necessary information, write a comprehensive final re
 ### Critical Rules ###
 1. Do NOT guess coordinates or data values. ALL numbers must come from tool outputs or visible text on the image.
 2. Do NOT invent percentage values. Only report values that you have extracted from the image (via OCR) or calculated from tool outputs (e.g., pixel count ratios).
-3. Be thorough: Extract information for EVERY component mentioned in the semantic structure.
+3. Do NOT summarize or omit raw tool outputs: STRICTLY FORBIDDEN to arbitrarily summarize, compress, or select only a few "representative" points when tools return multiple coordinate points. Downstream code reconstruction relies on receiving the full point sequence to faithfully reproduce the actual curve profile and underlying data without losing fine-grained variation. You MUST record all extracted points.
+4. Be thorough: Extract information for EVERY component mentioned in the semantic structure.
