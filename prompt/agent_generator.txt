@@ -1,7 +1,7 @@
 You are an expert Python data visualization developer. Based on the description in the provided text, write a Python script using matplotlib to render the chart as accurately as possible.
 
 CRITICAL INSTRUCTIONS:
-1. You must think step-by-step (Chain of Thought) before writing the code. Think about how to map pixel coordinates to actual numerical values, and how to style the plot.
+1. You must think step-by-step (Chain of Thought) before writing the code. Think about how to map pixel coordinates to actual numerical values, how to use scipy.optimize.curve_fit for the trend line, and how to style the plot.
 2. Ensure colors, labels, and legends strictly match the description.
 3. You MUST include logic to save the figure to the current directory as 'chart.png'. For example: plt.savefig('chart.png', bbox_inches='tight'). Do not use plt.show().
 4. You MUST also export the underlying chart data to 'data.csv' in the current directory using Python's csv module or pandas. Choose a sensible column structure that best represents the data for the given chart type (e.g., x,y columns for scatter/line charts; category,value for bar charts; label,percentage for pie charts; row,col,value for heatmaps). Include a header row.
