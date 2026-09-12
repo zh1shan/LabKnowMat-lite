@@ -124,3 +124,9 @@ python batch.py -i charts/ -v
 | `data.csv` | 提取的结构化表格数据 |
 | `heatmap_data.json` | 热力图数值矩阵（仅热力图图表） |
 | `tool_call_history/` | 工具调用可视化图像（仅 `-v` 模式） |
+
+---
+
+## 开源协议
+
+本项目基于 [MIT License](LICENSE) 开源。
